@@ -1,0 +1,27 @@
+# Datos reales de clientes: nunca se publican (SEGURIDAD.md §5)
+excelOperacionEjemplo.xlsx
+*.xlsx
+screenshotsFuncionamiento/
+
+# Grafo de conocimiento: incluye el Excel convertido a texto
+graphify-out/
+
+# Artefactos de herramientas
+.taste-skill/
+.claude/
+
+# Dependencias, builds y secretos (fase 1)
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
