@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seguimiento de tu vehículo · Fortaleza Servicar</title>
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <script>try { var t = localStorage.getItem('fs-tema'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;450;500;550;600;650&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/fortaleza.css">
+  <link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+  <div class="portal">
+    <header class="p-head">
+      <svg viewBox="0 0 26 30" aria-hidden="true"><path d="M13 1 24.5 5v9.2c0 7-4.9 12.6-11.5 14.8C6.4 26.8 1.5 21.2 1.5 14.2V5Z" fill="#9C2327"/><path d="M9 8.5h8.6v2.8h-5.6v2.6h4.8v2.8h-4.8v5.8H9Z" fill="#fff"/></svg>
+      <div><b>Fortaleza Servicar</b><span>Servicio automotriz · desde 2016</span></div>
+      <button class="p-tema" type="button" id="tema" aria-label="Cambiar el estilo de color"><i></i><span id="tema-n">Rojo</span></button>
+    </header>
+    <main id="p"></main>
+    <p class="foot-p">Fortaleza Servicar · Confianza, calidad y experiencia<br><a href="#aviso" id="aviso-link">Aviso de privacidad</a></p>
+  </div>
+
+  <div class="sheet-otp" id="otp" role="dialog" aria-modal="true" aria-labelledby="otp-h">
+    <div class="panel-otp">
+      <h2 id="otp-h">Confirma tu autorización</h2>
+      <p id="otp-p"></p>
+      <p class="demo">Prototipo: el código de prueba es 482913. En producción llega por SMS, vale 5 minutos y admite 5 intentos.</p>
+      <input class="otp" id="otp-in" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="Código de 6 dígitos" aria-describedby="otp-hint">
+      <div class="otp-hint" id="otp-hint">6 dígitos</div>
+      <button class="btn primary big-btn" type="button" id="otp-ok">Autorizar</button>
+      <button class="btn ghost big-btn" type="button" id="otp-cancel" style="margin-top:8px">Ahora no</button>
+    </div>
+  </div>
+  <script src="js/datos.js"></script>
+  <script src="js/portal.js"></script>
+</body>
+</html>
