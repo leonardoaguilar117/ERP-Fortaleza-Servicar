@@ -84,6 +84,7 @@ Abre http://localhost:8080 para el ERP, o http://localhost:8080/portal.html#k7Qw
 
 - La imagen (`docker/prototipo.Dockerfile`) sirve el prototipo con Caddy, sin privilegios de root, con cabeceras de seguridad y la ruta de salud `/healthz`.
 - Escucha en `$PORT` (8080 por defecto), así que también se puede publicar como *Web Service* de Docker en Render o Railway.
+- **En Render:** el repositorio trae un Blueprint (`render.yaml`). Ve a **New → Blueprint**, elige este repositorio y confirma. El servicio queda en el plan Free, que se duerme tras unos 15 minutos sin visitas; para una demo sin espera, cambia `plan` a `starter`. Cada push a `main` vuelve a desplegar.
 - Sin Docker Compose: `docker build -f docker/prototipo.Dockerfile -t fortaleza-prototipo .` y luego `docker run --rm -p 8080:8080 fortaleza-prototipo`.
 
 ### En el navegador
@@ -126,6 +127,7 @@ El razonamiento de cada decisión y los costos de hosting están en la [especifi
 │   └── js/               pantallas, datos de muestra, gráficas y diagrama de daños
 ├── docker/               imagen y configuración de Caddy para la versión de prueba del prototipo
 ├── docker-compose.yml    levanta el prototipo en http://localhost:8080
+├── render.yaml           Blueprint de Render para publicar el prototipo
 ├── data/vehiculos/       catálogo de 416 modelos del mercado mexicano (255 con versión, motor y km/l)
 ├── color/ · img/         paleta oficial, layout de referencia y piezas de marca
 ├── SEGURIDAD.md · CLAUDE.md · PROGRESO.md

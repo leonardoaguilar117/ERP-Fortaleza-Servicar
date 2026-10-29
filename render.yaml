@@ -1,0 +1,17 @@
+# Blueprint de Render: versión de prueba del prototipo (sin backend).
+# En Render: New → Blueprint → elige este repositorio. Render lee este archivo y crea el servicio.
+# docker-compose.yml no se usa aquí: es solo para correrlo en local.
+services:
+  - type: web
+    name: fortaleza-prototipo
+    runtime: docker
+    repo: https://github.com/leonardoaguilar117/ERP-Fortaleza-Servicar
+    branch: main
+    dockerfilePath: ./docker/prototipo.Dockerfile
+    dockerContext: .
+    # free: se duerme tras ~15 min sin visitas. Para enseñárselo al cliente sin espera, cambiar a "starter".
+    plan: free
+    region: ohio # la más cercana a México entre las de Render; se puede cambiar antes del primer despliegue
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit # cada push a main vuelve a desplegar
+    # El puerto no se configura: Render pasa PORT al contenedor y el Caddyfile escucha en él.

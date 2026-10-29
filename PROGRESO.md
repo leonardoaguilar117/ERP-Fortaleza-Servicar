@@ -47,6 +47,9 @@
   - Caddy sin root, salud en `/healthz`, puerto en `$PORT`.
   - Archivos: `docker/prototipo.Dockerfile`, `docker/Caddyfile` y `docker-compose.yml`.
   - **Pendiente:** probar el build; en esta máquina no hay Docker.
+- **Render:** Blueprint en `render.yaml` (web service Docker, plan free, región ohio, health check `/healthz`).
+  - Se crea con New → Blueprint.
+  - Pendiente: que el usuario haga el primer despliegue y confirme que levanta.
 - **Servir sin Docker:** `cd prototipo && python -m http.server 8765 --bind 127.0.0.1`, y abrir `http://127.0.0.1:8765/index.html`.
 - **Portal de prueba:**
   - `portal.html#k7Qw2mZ9pL4xT8vR`, código `482913`.
