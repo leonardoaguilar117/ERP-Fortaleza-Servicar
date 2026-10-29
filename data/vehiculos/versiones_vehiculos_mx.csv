@@ -1,0 +1,346 @@
+marca,modelo,anio_inicio,anio_fin,version,motor,cilindros,combustible,transmision,rendimiento_kml
+Audi,A3,1997,2012,Attraction|Ambition|Sportback|S3,1.6L / 1.8T / 2.0T,4,Gasolina,Manual 5|Manual 6|Tiptronic|S tronic 6,12.0
+Audi,A3,2013,,Dynamic|Select|S line|S3,1.4T TFSI / 1.8T / 2.0T,4,Gasolina,S tronic 7|Tiptronic 6,15.0
+Audi,A4,1995,,Trendy|Luxury|S line|S4,1.8T / 2.0T TFSI / 3.0T,4|6,Gasolina,Multitronic|S tronic 7|Tiptronic 8,12.5
+Audi,Q5,2009,,Elite|Dynamic|S line|SQ5,2.0T TFSI / 3.0T,4|6,Gasolina,S tronic 7|Tiptronic 8,11.0
+BMW,Serie 3,1990,2011,318i|320i|325i|330i (E36/E46/E90),1.9L / 2.0L / 2.5L / 3.0L L6,4|6,Gasolina,Manual 5|Automática 5|Automática 6,10.5
+BMW,Serie 3,2012,,320i|330i|340i|M340i (F30/G20),2.0T / 3.0T,4|6,Gasolina,Automática 8,13.5
+BMW,X1,2010,,sDrive18i|sDrive20i|xDrive25i,1.5T / 2.0T,3|4,Gasolina,Automática 6|DCT 7|Automática 8,13.5
+BMW,X3,2004,,xDrive20i|xDrive30i|M40i,2.0T / 3.0T,4|6,Gasolina,Automática 8,11.0
+Chevrolet,Astra,2000,2008,Std|Elegance|GSi,1.8L / 2.0L / 2.4L,4,Gasolina,Manual 5|Automática 4,11.5
+Chevrolet,Aveo,2008,2017,LS|LT|LTZ,1.6L E-Tec II,4,Gasolina,Manual 5|Automática 4,13.5
+Chevrolet,Aveo,2018,2023,LS|LT|Premier,1.5L L2B,4,Gasolina,Manual 5|Automática 6,16.5
+Chevrolet,Aveo,2024,,LS|LT|Premier,1.5L,4,Gasolina,Manual 5|CVT,17.5
+Chevrolet,Beat,2018,2021,LS|LT|Activ|Notchback,1.2L B12D1,4,Gasolina,Manual 5,17.0
+Chevrolet,Blazer,1990,2005,Std|LS|Xtreme,4.3L V6 Vortec,6,Gasolina,Manual 5|Automática 4,7.0
+Chevrolet,Captiva,2008,2017,Sport|LT|LTZ,2.4L Ecotec / 3.0L V6,4|6,Gasolina,Automática 6,10.0
+Chevrolet,Captiva,2022,,LS|LT|Premier,1.5T,4,Gasolina,CVT,13.0
+Chevrolet,Cavalier,1995,2005,Std|Z24,2.2L / 2.4L,4,Gasolina,Manual 5|Automática 4,11.0
+Chevrolet,Cavalier,2018,,LS|LT|Premier|Turbo,1.5L / 1.5T,4,Gasolina,Manual 5|Automática 6|CVT,15.0
+Chevrolet,Chevy,1994,2003,Joy|Swing|Pop|Monza,1.4L / 1.6L Family I,4,Gasolina,Manual 5|Automática 3,13.0
+Chevrolet,Chevy,2004,2012,Austero|Paq A|Paq B|C2,1.6L Family I,4,Gasolina,Manual 5|Automática 3,13.5
+Chevrolet,Cheyenne,1990,2013,Std|LT|2500,5.3L / 5.7L V8 / 4.3L V6,8|6,Gasolina,Manual 5|Automática 4,6.5
+Chevrolet,Cheyenne,2014,,Doble cabina|Z71|High Country,5.3L V8 / 6.2L V8,8,Gasolina,Automática 8|Automática 10,7.5
+Chevrolet,Cobalt,2013,2018,LS|LT|LTZ,1.8L Ecotec,4,Gasolina,Manual 5|Automática 6,13.0
+Chevrolet,Colorado,2004,,LT|Z71|ZR2,2.5L / 3.6L V6 / 2.7T,4|6,Gasolina,Automática 6|Automática 8,9.5
+Chevrolet,Cruze,2010,2016,LS|LT|LTZ,1.8L Ecotec,4,Gasolina,Manual 6|Automática 6,12.5
+Chevrolet,Cruze,2017,2019,LS|LT|Premier,1.4T,4,Gasolina,Manual 6|Automática 6,15.0
+Chevrolet,Equinox,2005,2017,LS|LT|LTZ,2.4L Ecotec / 3.6L V6,4|6,Gasolina,Automática 6,10.5
+Chevrolet,Equinox,2018,,LS|LT|Premier|RS,1.5T,4,Gasolina,Automática 6|CVT,13.0
+Chevrolet,Express,1996,,Cargo|Pasajeros 12|15,4.3L V6 / 5.3L V8 / 6.0L V8,6|8,Gasolina,Automática 4|Automática 6,6.0
+Chevrolet,Groove,2021,,LS|LT|Premier,1.5L,4,Gasolina,Manual 5|CVT,16.0
+Chevrolet,Malibu,2004,2012,LS|LT|LTZ,2.4L Ecotec,4,Gasolina,Automática 4|Automática 6,11.0
+Chevrolet,Malibu,2013,2023,LT|Premier,1.5T / 2.0T,4,Gasolina,Automática 6|Automática 9,13.5
+Chevrolet,Matiz,2004,2015,Básico|Paq A|Paq B,1.0L S-TEC,3,Gasolina,Manual 5,16.5
+Chevrolet,Meriva,2003,2010,Std|Elegance,1.8L,4,Gasolina,Manual 5|Easytronic,11.5
+Chevrolet,Onix,2021,,LS|LT|Premier|RS,1.2L / 1.0T,3,Gasolina,Manual 6|Automática 6,19.0
+Chevrolet,Optra,2006,2010,LS|LT|Hatchback,1.8L,4,Gasolina,Manual 5|Automática 4,11.5
+Chevrolet,Pick Up C/K,1990,1998,C-15|Custom|Silverado,4.3L V6 / 5.7L V8,6|8,Gasolina,Manual 5|Automática 4,6.0
+Chevrolet,S10,1994,2012,Std|LS|ZR2,2.2L / 4.3L V6,4|6,Gasolina,Manual 5|Automática 4,9.0
+Chevrolet,S10,2022,,Max|Max Doble cabina,2.5L,4,Gasolina,Manual 5,10.5
+Chevrolet,Silverado,1999,2013,1500|2500|3500,4.8L / 5.3L / 6.0L V8,8,Gasolina,Automática 4|Automática 6,6.5
+Chevrolet,Silverado,2014,,1500 LT|RST|LTZ|High Country,5.3L / 6.2L V8 / 2.7T,8|4,Gasolina,Automática 8|Automática 10,8.0
+Chevrolet,Sonic,2012,2017,LS|LT|LTZ,1.6L Ecotec,4,Gasolina,Manual 5|Automática 6,13.5
+Chevrolet,Spark,2011,2015,LS|LT|Classic,1.2L,4,Gasolina,Manual 5,16.0
+Chevrolet,Spark,2016,2021,LT|Activ,1.4L,4,Gasolina,Manual 5|CVT,15.5
+Chevrolet,Suburban,1990,2014,LS|LT|LTZ,5.3L V8 / 5.7L V8,8,Gasolina,Automática 4|Automática 6,6.5
+Chevrolet,Suburban,2015,,LT|Premier|High Country,5.3L / 6.2L V8,8,Gasolina,Automática 6|Automática 10,7.2
+Chevrolet,Tahoe,1995,2014,LS|LT|LTZ,5.3L V8 Vortec,8,Gasolina,Automática 4|Automática 6,6.8
+Chevrolet,Tahoe,2015,,LT|Premier|High Country|Z71,5.3L / 6.2L V8,8,Gasolina,Automática 6|Automática 10,7.5
+Chevrolet,Tornado,2004,2020,Std|Paq A|Paq B,1.8L,4,Gasolina,Manual 5,12.5
+Chevrolet,Tornado,2021,,LS|LT,1.5L,4,Gasolina,Manual 5,14.0
+Chevrolet,Tracker,2007,2012,LS|LT (Suzuki),2.0L,4,Gasolina,Manual 5|Automática 4,10.5
+Chevrolet,Tracker,2020,,LS|LT|Premier|RS,1.2T,3,Gasolina,Manual 6|Automática 6,16.0
+Chevrolet,Trailblazer,2002,2009,LS|LT|EXT,4.2L Vortec,6,Gasolina,Automática 4,7.2
+Chevrolet,Trax,2013,2020,LS|LT|LTZ,1.8L / 1.4T,4,Gasolina,Manual 6|Automática 6,12.8
+Chevrolet,Trax,2024,,LS|LT|Activ|RS,1.2T,3,Gasolina,Automática 6,15.5
+Chirey,Tiggo 2,2022,,Comfort|Luxury|Pro,1.5L,4,Gasolina,Manual 5|CVT,14.5
+Chirey,Tiggo 7,2022,,Luxury|Pro|PHEV,1.5T / 1.6T,4,Gasolina|Híbrido,CVT|DCT 7,12.5
+Chrysler,Neon,1994,2005,LE|LX|R/T|SRT4,2.0L SOHC/DOHC,4,Gasolina,Manual 5|Automática 3|Automática 4,11.5
+Chrysler,PT Cruiser,2001,2010,Classic|Touring|Limited|GT,2.4L / 2.4T,4,Gasolina,Manual 5|Automática 4,10.0
+Chrysler,Pacifica,2017,,Touring|Limited|Pinnacle|Hybrid,3.6L Pentastar / 3.6 Híbrido enchufable,6,Gasolina|Híbrido,Automática 9|eCVT,10.0
+Chrysler,Town & Country,1990,2016,LX|Limited|Touring,3.3L / 3.8L / 3.6L Pentastar,6,Gasolina,Automática 4|Automática 6,8.5
+Chrysler,Voyager,1990,2007,SE|LX,2.4L / 3.3L V6,4|6,Gasolina,Automática 4,8.5
+Dodge,Atos,2001,2012,GL|GLS|Paq A,1.1L Epsilon / 1.0L,4,Gasolina,Manual 5,16.0
+Dodge,Attitude,2006,2014,GL|GLS|SE (Hyundai Accent),1.6L Alpha / Gamma,4,Gasolina,Manual 5|Automática 4,14.0
+Dodge,Attitude,2015,2024,SE|SXT|GT (Mitsubishi Attrage),1.2L 3A92,3,Gasolina,Manual 5|CVT,19.0
+Dodge,Attitude,2025,,SE|SXT,1.5L,4,Gasolina,Manual 5|CVT,17.0
+Dodge,Avenger,2008,2014,SE|SXT|R/T,2.4L World Engine / 3.5L V6,4|6,Gasolina,Automática 4|Automática 6,10.5
+Dodge,Caliber,2007,2012,SE|SXT|R/T|SRT4,1.8L / 2.0L / 2.4L World Engine,4,Gasolina,Manual 5|CVT,11.5
+Dodge,Charger,2006,2023,SE|SXT|R/T|SRT,3.5L / 3.6L Pentastar / 5.7L HEMI / 6.4L,6|8,Gasolina,Automática 5|Automática 8,8.5
+Dodge,Dakota,1990,2011,ST|SLT|Sport,3.9L V6 / 4.7L V8 / 3.7L V6,6|8,Gasolina,Manual 5|Automática 4,6.5
+Dodge,Dart,2013,2016,SE|SXT|Limited|GT,2.0L Tigershark / 1.4T MultiAir / 2.4L,4,Gasolina,Manual 6|Automática 6|DDCT,13.0
+Dodge,Durango,1998,,SXT|Limited|Citadel|R/T,4.7L V8 / 3.6L Pentastar / 5.7L HEMI,8|6,Gasolina,Automática 5|Automática 8,7.5
+Dodge,Grand Caravan,1990,2007,SE|SXT|Limited,3.3L / 3.8L V6,6,Gasolina,Automática 4,7.8
+Dodge,Grand Caravan,2008,2020,SE|SXT|R/T,3.6L Pentastar,6,Gasolina,Automática 6,9.0
+Dodge,H100,2003,2011,Panel|Pasajeros|Chasis (Hyundai),2.4L / 2.5 Diésel,4,Gasolina|Diésel,Manual 5,8.5
+Dodge,Journey,2009,2020,SE|SXT|R/T|Crossroad,2.4L World Engine / 3.6L Pentastar,4|6,Gasolina,Automática 4|Automática 6,9.0
+Dodge,Journey,2022,,SE|SXT|GT (GAC GS5),1.5T,4,Gasolina,DCT 6,12.0
+Dodge,Neon,2017,2020,SE|SXT (Fiat Tipo),1.6L E.torQ,4,Gasolina,Manual 5|Automática 6,13.5
+Dodge,Verna,2004,2006,GL|GLS (Hyundai Accent),1.5L / 1.6L,4,Gasolina,Manual 5|Automática 4,13.5
+Dodge,Vision,2015,2018,SE|SXT (Fiat Grand Siena),1.6L E.torQ,4,Gasolina,Manual 5,13.5
+Dodge,i10,2011,2014,Std|GLS (Hyundai),1.1L Epsilon,4,Gasolina,Manual 5,16.0
+Fiat,500,2009,2019,Pop|Lounge|Sport|Abarth|Cabrio,1.4L / 1.4T MultiAir,4,Gasolina,Manual 5|Automática 6|Dualogic,14.5
+Fiat,Ducato,2006,,Cargo|Pasajeros|Chasis,2.3L MultiJet Diésel,4,Diésel,Manual 6,10.5
+Fiat,Mobi,2017,2021,Like|Trekking,1.0L Fire Evo,4,Gasolina,Manual 5,17.0
+Fiat,Palio,2004,2012,ELX|Adventure|Weekend,1.6L / 1.8L,4,Gasolina,Manual 5,12.5
+Fiat,Pulse,2022,,Drive|Impetus|Abarth,1.3L Firefly / 1.0T GSE,4|3,Gasolina,Manual 5|CVT,16.5
+Fiat,Uno,2010,2016,Way|Fire|Attractive,1.4L Fire Evo,4,Gasolina,Manual 5,15.0
+Ford,Courier,2001,2012,Std|L,1.6L Rocam,4,Gasolina,Manual 5,12.5
+Ford,EcoSport,2004,2012,XLS|XLT|4WD,1.6L / 2.0L Duratec,4,Gasolina,Manual 5|Automática 4,11.0
+Ford,EcoSport,2013,2022,S|SE|Titanium,1.6L / 2.0L / 1.5L Dragon,4|3,Gasolina,Manual 5|Automática 6,12.5
+Ford,Edge,2007,2024,SE|SEL|Limited|Sport|ST,3.5L V6 / 2.0T EcoBoost,6|4,Gasolina,Automática 6|Automática 8,9.5
+Ford,Escape,2001,2012,XLS|XLT|Limited|Hybrid,2.0L / 2.5L / 3.0L V6,4|6,Gasolina|Híbrido,Automática 4|Automática 6,9.5
+Ford,Escape,2013,,S|SE|Titanium|Hybrid,2.5L / 1.5T / 2.0T / 2.5 Híbrido,4|3,Gasolina|Híbrido,Automática 6|Automática 8|eCVT,13.0
+Ford,Escort,1990,2002,LX|GL|ZX2,1.9L / 2.0L,4,Gasolina,Manual 5|Automática 4,11.5
+Ford,Expedition,1997,,XLT|Eddie Bauer|Limited|Platinum,5.4L V8 / 3.5T EcoBoost,8|6,Gasolina,Automática 6|Automática 10,6.8
+Ford,Explorer,1991,2010,XLT|Limited|Sport Trac,4.0L V6 / 4.6L V8,6|8,Gasolina,Automática 5,6.8
+Ford,Explorer,2011,,XLT|Limited|Platinum|ST,3.5L V6 / 2.3T / 3.0T,6|4,Gasolina,Automática 6|Automática 10,9.0
+Ford,F-250,1990,,XL|XLT|Super Duty,5.4L V8 / 6.2L V8 / 6.7 Diésel,8,Gasolina|Diésel,Automática 6|Automática 10,5.5
+Ford,Fiesta,1995,2010,First|Trend|Sport,1.6L Rocam / Zetec,4,Gasolina,Manual 5|Automática 4,13.0
+Ford,Fiesta,2011,2019,S|SE|Titanium|ST,1.6L Sigma / 1.0T EcoBoost,4|3,Gasolina,Manual 5|PowerShift 6,15.5
+Ford,Figo,2016,2021,Impulse|Energy|Titanium,1.5L Dragon,3,Gasolina,Manual 5|Automática 6,15.5
+Ford,Focus,1999,2011,LX|SE|ZX3|ZX5,2.0L Zetec / 2.0L Duratec,4,Gasolina,Manual 5|Automática 4,11.5
+Ford,Focus,2012,2018,S|SE|Titanium|ST,2.0L GDI / 2.0T EcoBoost,4,Gasolina,Manual 5|PowerShift 6,13.5
+Ford,Fusion,2006,2012,S|SE|SEL|Sport,2.5L / 3.0L V6,4|6,Gasolina,Automática 6,10.5
+Ford,Fusion,2013,2020,SE|SE Luxury|Titanium|Hybrid,2.5L / 2.0T / 2.0L Híbrido,4,Gasolina|Híbrido,Automática 6|eCVT,13.0
+Ford,Ikon,2001,2015,First|Ambiente|Trend,1.6L Zetec Rocam / Sigma,4,Gasolina,Manual 5,13.0
+Ford,Lobo,1997,2008,XL|XLT|Lariat|Harley-Davidson,4.6L V8 / 5.4L V8 Triton,8,Gasolina,Manual 5|Automática 4,6.0
+Ford,Lobo,2009,2014,XL|XLT|Lariat|Platinum|Raptor,4.6L V8 / 5.4L V8 / 3.5T,8|6,Gasolina,Automática 6,7.0
+Ford,Lobo,2015,,XL|XLT|Lariat|Platinum|Raptor,2.7T / 3.5T EcoBoost / 5.0L V8,6|8,Gasolina,Automática 6|Automática 10,8.5
+Ford,Maverick,2022,,XLT|Lariat|Hybrid,2.0T EcoBoost / 2.5 Híbrido,4,Gasolina|Híbrido,Automática 8|eCVT,13.5
+Ford,Mustang,1990,2014,V6|GT|Shelby,3.7L V6 / 4.6L V8 / 5.0L V8,6|8,Gasolina,Manual 5|Automática 5|Automática 6,8.0
+Ford,Mustang,2015,,EcoBoost|GT|Mach 1,2.3T EcoBoost / 5.0L V8,4|8,Gasolina,Manual 6|Automática 10,9.0
+Ford,Ranger,1990,2012,XL|XLT|Edge,2.3L / 2.5L / 4.0L V6,4|6,Gasolina,Manual 5|Automática 5,9.0
+Ford,Ranger,2019,,XL|XLT|Limited|Raptor,2.5L / 2.3T / 2.2 Diésel,4,Gasolina|Diésel,Manual 6|Automática 10,10.5
+Ford,Territory,2021,,Trend|Titanium,1.5T EcoBoost / 1.8T,4,Gasolina,CVT|DCT 7,13.0
+Ford,Transit,2001,,Van|Chasis|Pasajeros,2.2 TDCi / 3.5L V6 / 2.0 EcoBlue,4|6,Diésel|Gasolina,Manual 6|Automática 10,9.0
+Ford,Windstar,1995,2003,GL|LX|Sport,3.8L V6,6,Gasolina,Automática 4,7.5
+GMC,Sierra,1990,,SLE|SLT|Denali|AT4,5.3L V8 / 6.2L V8,8,Gasolina,Automática 6|Automática 8|Automática 10,7.5
+Geely,Coolray,2023,,Sport|Flagship,1.5T,3,Gasolina,DCT 7,14.5
+Honda,Accord,1990,2007,LX|EX|V6,2.2L / 2.3L / 2.4L / 3.0L V6,4|6,Gasolina,Manual 5|Automática 4|Automática 5,10.5
+Honda,Accord,2008,2017,LX|EX|EXL|Sport,2.4L K24 / 3.5L V6,4|6,Gasolina,Manual 5|Automática 5|CVT,12.0
+Honda,Accord,2018,,Sport|Touring|Hybrid,1.5T / 2.0T / 2.0 Híbrido,4,Gasolina|Híbrido,CVT|Automática 10|eCVT,15.0
+Honda,BR-V,2017,,Uniq|Prime,1.5L L15,4,Gasolina,CVT,14.5
+Honda,CR-V,1997,2011,LX|EX|EXL,2.0L B20 / 2.4L K24,4,Gasolina,Manual 5|Automática 4|Automática 5,10.0
+Honda,CR-V,2012,,EX|i-Style|Turbo Plus|Touring|Hybrid,2.4L K24 / 1.5T / 2.0 Híbrido,4,Gasolina|Híbrido,Automática 5|CVT|eCVT,13.0
+Honda,City,2009,2020,LX|EX|EXL,1.5L L15,4,Gasolina,Manual 5|Automática 5|CVT,15.5
+Honda,City,2021,,Sport|Prime|Touring|Hatchback,1.5L L15 i-VTEC,4,Gasolina,CVT,17.5
+Honda,Civic,1990,2005,LX|EX|Si,1.6L / 1.7L D-series,4,Gasolina,Manual 5|Automática 4,13.0
+Honda,Civic,2006,2015,LX|EX|EXL|Si,1.8L R18 / 2.0L Si,4,Gasolina,Manual 5|Automática 5,13.5
+Honda,Civic,2016,,i-Style|Turbo|Touring|Si|Type R,2.0L / 1.5T / 2.0T,4,Gasolina,Manual 6|CVT,15.5
+Honda,Element,2003,2011,LX|EX,2.4L K24,4,Gasolina,Manual 5|Automática 5,9.5
+Honda,Fit,2003,2020,LX|EX|Fun|Hit,1.5L L15,4,Gasolina,Manual 5|CVT,16.0
+Honda,HR-V,2016,,Uniq|Prime|Touring|Sport,1.8L R18 / 1.5T,4,Gasolina,Manual 6|CVT,14.5
+Honda,Odyssey,1995,,LX|EX|EXL|Touring|Prime,3.5L V6 J35,6,Gasolina,Automática 5|Automática 9|Automática 10,8.5
+Honda,Pilot,2003,,EX|Touring|Black Edition,3.5L V6 J35,6,Gasolina,Automática 5|Automática 9|Automática 10,8.5
+Honda,Ridgeline,2006,,RT|RTL|Black Edition,3.5L V6 J35,6,Gasolina,Automática 5|Automática 9,8.0
+Hyundai,Accent,2015,2023,GL|GLS|Hatchback,1.6L Gamma / 1.6L Smartstream,4,Gasolina,Manual 6|Automática 6|IVT,16.0
+Hyundai,Creta,2017,,GLS|Limited|GLS Premium,1.6L Gamma / 1.5L Smartstream,4,Gasolina,Manual 6|Automática 6|IVT,14.5
+Hyundai,Elantra,2014,2020,GLS|Limited|Sport,1.8L Nu / 2.0L Nu / 1.6T,4,Gasolina,Manual 6|Automática 6|DCT 7,13.5
+Hyundai,Elantra,2021,,GLS|Limited|N Line|Hybrid,2.0L Smartstream / 1.6T / 1.6 Híbrido,4,Gasolina|Híbrido,IVT|DCT 7|DCT 6,15.5
+Hyundai,Grand i10,2015,,GL|GL MID|GLS|Sedán,1.2L Kappa,4,Gasolina,Manual 5|Automática 4|AMT,17.0
+Hyundai,HB20,2024,,Sedán|Hatchback,1.6L Gamma,4,Gasolina,Manual 6|Automática 6,15.0
+Hyundai,Santa Fe,2014,,GLS|Limited|Hybrid,2.4L Theta / 3.3L V6 / 2.5L / 1.6T Híbrido,4|6,Gasolina|Híbrido,Automática 6|Automática 8,10.0
+Hyundai,Sonata,2014,2018,GLS|Limited|Hybrid,2.4L Theta / 2.0T / 2.0 Híbrido,4,Gasolina|Híbrido,Automática 6,12.5
+Hyundai,Tucson,2014,2021,GLS|Limited|Turbo,2.0L Nu / 2.4L Theta / 1.6T,4,Gasolina,Automática 6|DCT 7,11.5
+Hyundai,Tucson,2022,,GLS|Limited|Hybrid,2.0L / 2.5L / 1.6T Híbrido,4,Gasolina|Híbrido,Automática 6|Automática 8,12.5
+JAC,Frison,2023,,T8|T6,2.0T Gasolina / 2.0T Diésel,4,Gasolina|Diésel,Manual 6|Automática 8,10.5
+JAC,Sei2,2017,,Comfort|Limited,1.5L,4,Gasolina,Manual 5|CVT,14.0
+JAC,Sei3,2017,,Comfort|Limited|Pro,1.6L / 1.5T,4,Gasolina,Manual 5|CVT,13.5
+Jeep,Cherokee,1990,2001,Sport|Classic (XJ),4.0L L6,6,Gasolina,Manual 5|Automática 4,7.0
+Jeep,Cherokee,2014,,Sport|Latitude|Limited|Trailhawk (KL),2.4L Tigershark / 3.2L Pentastar / 2.0T,4|6,Gasolina,Automática 9,10.0
+Jeep,Compass,2007,2016,Sport|Latitude|Limited,2.0L / 2.4L World Engine,4,Gasolina,Manual 5|CVT|Automática 6,10.0
+Jeep,Compass,2017,,Sport|Latitude|Limited|Trailhawk,2.4L Tigershark / 1.3T,4,Gasolina,Automática 6|Automática 9,11.5
+Jeep,Grand Cherokee,1993,2010,Laredo|Limited|Overland,4.0L L6 / 4.7L V8 / 5.7L HEMI,6|8,Gasolina,Automática 4|Automática 5,6.8
+Jeep,Grand Cherokee,2011,,Laredo|Limited|Overland|Summit|SRT|4xe,3.6L Pentastar / 5.7L HEMI / 2.0T 4xe,6|8|4,Gasolina|Híbrido,Automática 8,8.5
+Jeep,Liberty,2002,2012,Sport|Limited|Renegade,3.7L V6 PowerTech,6,Gasolina,Automática 4,7.5
+Jeep,Patriot,2007,2017,Sport|Latitude|Limited,2.0L / 2.4L World Engine,4,Gasolina,Manual 5|CVT|Automática 6,10.0
+Jeep,Renegade,2016,,Sport|Latitude|Limited|Trailhawk,1.8L E.torQ / 2.4L Tigershark / 1.3T,4,Gasolina,Manual 5|Automática 6|Automática 9,12.0
+Jeep,Wrangler,1990,2006,Sport|Sahara|Rubicon (YJ/TJ),2.5L / 4.0L L6,4|6,Gasolina,Manual 5|Automática 3|Automática 4,7.0
+Jeep,Wrangler,2007,,Sport|Sahara|Rubicon|Unlimited|4xe,3.8L / 3.6L Pentastar / 2.0T 4xe,6|4,Gasolina|Híbrido,Manual 6|Automática 5|Automática 8,8.0
+Kia,Forte,2015,2018,LX|EX|SX|GT,1.8L Nu / 2.0L Nu,4,Gasolina,Manual 6|Automática 6,13.5
+Kia,Forte,2019,2023,LX|EX|GT-Line|GT,2.0L Nu / 1.6T Gamma,4,Gasolina,Manual 6|IVT|DCT 7,15.5
+Kia,K3,2024,,LX|EX|GT-Line,1.6L MPI / 2.0L,4,Gasolina,Manual 6|IVT|Automática 6,16.5
+Kia,Niro,2020,,EX|EX Premium (Híbrido),1.6L Kappa Híbrido,4,Híbrido,DCT 6,22.0
+Kia,Optima,2016,2020,LX|EX|SXL,2.4L GDI / 2.0T,4,Gasolina,Automática 6,12.0
+Kia,Rio,2016,2023,L|LX|EX|S,1.6L Gamma MPI,4,Gasolina,Manual 6|Automática 6|IVT,16.0
+Kia,Seltos,2020,,LX|EX|SX|GT-Line,2.0L Nu / 1.4T / 1.6T,4,Gasolina,Manual 6|IVT|DCT 7,14.5
+Kia,Sonet,2023,,LX|EX|EX Pack,1.5L Smartstream,4,Gasolina,Manual 6|IVT,16.5
+Kia,Sorento,2016,,LX|EX|SXL|Hybrid,2.4L Theta / 3.3L V6 / 1.6T Híbrido,4|6,Gasolina|Híbrido,Automática 6|Automática 8,10.0
+Kia,Soul,2016,2022,LX|EX|SX|GT-Line,1.6L / 2.0L,4,Gasolina,Manual 6|Automática 6|IVT,13.0
+Kia,Sportage,2016,2022,LX|EX|SX,2.0L Nu / 2.4L Theta II,4,Gasolina,Manual 6|Automática 6,11.5
+Kia,Sportage,2023,,LX|EX|SX|GT-Line|Hybrid,2.0L / 2.5L / 1.6T Híbrido,4,Gasolina|Híbrido,Automática 6|Automática 8|Automática 6 HEV,13.0
+MG,HS,2021,,Excite|Trophy|PHEV,1.5T,4,Gasolina|Híbrido,DCT 7,12.5
+MG,MG3,2022,,STD|Excite|Hybrid+,1.5L / 1.5 Híbrido,4,Gasolina|Híbrido,Manual 5|Automática 4|eCVT,16.5
+MG,MG5,2021,,STD|Excite|Elegance|GT,1.5L,4,Gasolina,Manual 5|CVT,16.0
+MG,RX5,2021,,Excite|Elegance|Trophy,1.5T / 2.0T,4,Gasolina,DCT 7,12.0
+MG,ZS,2021,,STD|Excite|Elegance|Hybrid+,1.5L / 1.0T / 1.5 Híbrido,4|3,Gasolina|Híbrido,Manual 5|CVT|Automática 6,14.5
+Mazda,BT-50,2007,,Cabina sencilla|Doble cabina|4x4,2.2L / 2.5L / 3.0 Diésel,4,Gasolina|Diésel,Manual 5|Manual 6|Automática 6,10.0
+Mazda,CX-3,2016,,i|i Sport|i Grand Touring,2.0L Skyactiv-G,4,Gasolina,Manual 6|Automática 6,15.0
+Mazda,CX-30,2020,,i|i Sport|i Grand Touring|Signature|Turbo,2.0L / 2.5L Skyactiv-G / 2.5T,4,Gasolina,Automática 6,14.5
+Mazda,CX-5,2013,,i|i Sport|i Grand Touring|Signature|Turbo,2.0L / 2.5L Skyactiv-G / 2.5T,4,Gasolina,Automática 6,13.5
+Mazda,CX-7,2007,2012,i Sport|s Grand Touring,2.5L / 2.3T DISI,4,Gasolina,Automática 5|Automática 6,9.5
+Mazda,CX-9,2007,2023,Sport|Grand Touring|Signature,3.5L / 3.7L V6 / 2.5T,6|4,Gasolina,Automática 6,9.0
+Mazda,MX-5,2006,,i Sport|Grand Touring|RF,2.0L MZR / 2.0L Skyactiv-G,4,Gasolina,Manual 6|Automática 6,14.0
+Mazda,Mazda 2,2011,2015,Sport|Touring,1.5L ZY-VE,4,Gasolina,Manual 5|Automática 4,15.0
+Mazda,Mazda 2,2016,,i|i Sport|i Touring|i Grand Touring,1.5L Skyactiv-G,4,Gasolina,Manual 6|Automática 6,17.0
+Mazda,Mazda 3,2004,2013,i|s|Speed,2.0L / 2.3L / 2.5L MZR,4,Gasolina,Manual 5|Automática 4|Automática 5,11.5
+Mazda,Mazda 3,2014,,i|i Sport|s|Signature|Turbo,2.0L / 2.5L Skyactiv-G / 2.5T,4,Gasolina,Manual 6|Automática 6,15.0
+Mazda,Mazda 5,2007,2015,Sport|Touring|Grand Touring,2.0L / 2.5L MZR,4,Gasolina,Manual 5|Automática 5,10.5
+Mazda,Mazda 6,2004,2013,i|s|Grand Touring,2.3L / 2.5L / 3.7L V6,4|6,Gasolina,Manual 5|Automática 5|Automática 6,10.5
+Mazda,Mazda 6,2014,2021,i Sport|i Grand Touring|Signature,2.5L Skyactiv-G / 2.5T,4,Gasolina,Automática 6,13.5
+Mercedes-Benz,Clase A,2013,,A180|A200|A250|AMG A35,1.3T / 1.6T / 2.0T,4,Gasolina,DCT 7,15.0
+Mercedes-Benz,Clase C,1994,2014,C180|C200|C230|C280|C300,1.8T / 2.5L V6 / 3.0L V6,4|6,Gasolina,Automática 5|Automática 7,10.5
+Mercedes-Benz,Clase C,2015,,C200|C300|AMG C43|AMG C63,1.5T / 2.0T / 3.0T / 4.0T V8,4|6|8,Gasolina,Automática 7|Automática 9,12.5
+Mercedes-Benz,GLC,2016,,GLC 300|AMG GLC 43,2.0T / 3.0T,4|6,Gasolina,Automática 9,11.0
+Mercedes-Benz,Sprinter,1996,,Van|Pasajeros|Chasis,2.1 CDI / 2.2 CDI / 3.0 V6 CDI,4|6,Diésel,Manual 6|Automática 7,9.5
+Mitsubishi,L200,2004,,GL|GLX|GLS Diésel|Doble cabina,2.4L 4G64 / 2.4 MIVEC Diésel,4,Gasolina|Diésel,Manual 5|Manual 6|Automática 5,11.0
+Mitsubishi,Lancer,2003,2017,ES|GTS|Ralliart|Evolution,2.0L 4B11 / 2.4L,4,Gasolina,Manual 5|CVT,11.5
+Mitsubishi,Mirage,2014,,GLX|GLS|G4 (sedán),1.2L 3A92,3,Gasolina,Manual 5|CVT,19.0
+Mitsubishi,Montero,2003,2021,Limited|Sport|GLS,3.8L V6 / 3.0L V6 / 2.4 Diésel,6|4,Gasolina|Diésel,Automática 5|Automática 8,8.0
+Mitsubishi,Outlander,2003,2021,ES|SE|GT|Limited,2.4L 4B12 / 3.0L V6,4|6,Gasolina,CVT|Automática 6,10.5
+Mitsubishi,Outlander,2022,,SE|SEL|PHEV,2.5L / 2.4 Híbrido enchufable,4,Gasolina|Híbrido,CVT,12.0
+Mitsubishi,Outlander Sport,2011,,ES|SE|GT|Limited,2.0L 4B11 / 2.4L,4,Gasolina,Manual 5|CVT,12.5
+Mitsubishi,Xpander,2023,,GLS|SE|Cross,1.5L 4A91,4,Gasolina,Manual 5|CVT,14.5
+Nissan,Almera,2001,2006,GXE|Q,1.8L QG18DE,4,Gasolina,Manual 5|Automática 4,12.5
+Nissan,Altima,1993,2006,GXE|SE|3.5 SE,2.5L QR25DE / 3.5L VQ35DE,4|6,Gasolina,Automática 4|Automática 5,10.0
+Nissan,Altima,2007,2019,Sense|Advance|Exclusive,2.5L QR25DE,4,Gasolina,CVT,12.8
+Nissan,Aprio,2008,2010,Custom|Emotion,1.6L K7M (Renault),4,Gasolina,Manual 5,12.8
+Nissan,Frontier,2016,,LE|Pro-4X|Platinum,2.5L QR25DE / 2.3L Diésel,4,Gasolina|Diésel,Manual 6|Automática 7,10.5
+Nissan,Juke,2011,2017,Advance|Exclusive,1.6T MR16DDT,4,Gasolina,Manual 6|CVT,13.5
+Nissan,Kicks,2017,2021,Sense|Advance|Exclusive,1.6L HR16DE,4,Gasolina,Manual 5|CVT,16.0
+Nissan,Kicks,2022,,Sense|Advance|Exclusive|e-Power,1.6L HR16DE / 1.2L e-Power,4|3,Gasolina|Híbrido,CVT|e-Power,16.5
+Nissan,Magnite,2024,,Sense|Advance,1.0L B4D,3,Gasolina,Manual 5|CVT,17.5
+Nissan,March,2011,2020,Drive|Sense|Advance|SR,1.6L HR16DE,4,Gasolina,Manual 5|Automática 4,15.8
+Nissan,March,2021,,Sense|Advance|Exclusive,1.6L HR16DE,4,Gasolina,Manual 5|CVT,16.5
+Nissan,Murano,2003,2020,SL|SLAWD|Exclusive,3.5L VQ35DE,6,Gasolina,CVT,9.2
+Nissan,NP300,2008,2015,Estaquitas|Chasis|Doble cabina,2.4L KA24DE,4,Gasolina,Manual 5,8.5
+Nissan,NP300,2016,,Chasis|Estaquitas|Doble cabina|Frontier,2.5L QR25DE,4,Gasolina,Manual 5,9.7
+Nissan,NP300,2016,,Doble cabina SE Diésel,2.3L YS23DDT,4,Diésel,Manual 6|Automática 7,12.5
+Nissan,Note,2015,2020,Sense|Advance|Exclusive,1.6L HR16DE,4,Gasolina,Manual 5|CVT,16.0
+Nissan,Pathfinder,2005,2012,SE|LE,4.0L VQ40DE,6,Gasolina,Automática 5,7.5
+Nissan,Pathfinder,2013,2022,Sense|Advance|Exclusive,3.5L VQ35DE,6,Gasolina,CVT|Automática 9,9.0
+Nissan,Pick Up D21,1990,2008,Estaquitas|Chasis|King Cab,2.4L KA24E,4,Gasolina,Manual 5,8.0
+Nissan,Platina,2002,2010,K|Q|Q Plus,1.6L K4M (Renault),4,Gasolina,Manual 5|Automática 4,13.0
+Nissan,Sentra,1990,1999,GST|GXE,1.6L GA16DE,4,Gasolina,Manual 5|Automática 4,12.5
+Nissan,Sentra,2000,2006,GXE|XE|SE-R,1.8L QG18DE,4,Gasolina,Manual 5|Automática 4,12.8
+Nissan,Sentra,2007,2012,Custom|Emotion|Premium,2.0L MR20DE,4,Gasolina,Manual 6|CVT,13.5
+Nissan,Sentra,2013,2019,Sense|Advance|Exclusive,1.8L MRA8DE,4,Gasolina,Manual 6|CVT,15.6
+Nissan,Sentra,2020,,Sense|Advance|Exclusive|SR,2.0L MR20DD,4,Gasolina,Manual 6|CVT,15.0
+Nissan,Tiida,2004,2018,Custom|Emotion|Premium,1.8L MR18DE,4,Gasolina,Manual 6|Automática 4,13.2
+Nissan,Tiida,2017,2018,Sense|Advance|Exclusive (Pulsar),1.6L HR16DE / 1.6T,4,Gasolina,Manual 6|CVT,15.0
+Nissan,Tsuru,1992,2017,GS I|GS II|GSR,1.6L GA16DE,4,Gasolina,Manual 5,13.5
+Nissan,Tsuru,1992,2017,GS II Aut,1.6L GA16DE,4,Gasolina,Automática 3,11.5
+Nissan,Urvan,1990,2013,Estándar|Panel|Pasajeros,2.4L KA24DE,4,Gasolina,Manual 5,7.5
+Nissan,Urvan,2014,,Panel|Pasajeros 15|Amplia,2.5L QR25DE,4,Gasolina,Manual 5,8.5
+Nissan,Versa,2012,2019,Drive|Sense|Advance|Exclusive,1.6L HR16DE,4,Gasolina,Manual 5|Automática 4|CVT,15.5
+Nissan,Versa,2020,,Sense|Advance|Exclusive,1.6L HR16DE,4,Gasolina,Manual 5|CVT,17.0
+Nissan,X-Trail,2002,2014,LE|SLX|Advance,2.5L QR25DE,4,Gasolina,Manual 6|Automática 4|CVT,10.5
+Nissan,X-Trail,2015,2022,Sense|Advance|Exclusive|Hybrid,2.5L QR25DE,4,Gasolina|Híbrido,CVT,12.5
+Nissan,X-Trail,2023,,Advance|Exclusive|e-Power,1.5T VC-Turbo / e-Power,3,Gasolina|Híbrido,CVT|e-Power,15.0
+Peugeot,2008,2015,,Active|Allure|GT,1.6L / 1.2T PureTech,4|3,Gasolina,Manual 5|Automática 6,14.5
+Peugeot,206,1999,2010,XR|XS|XT|CC|Sedán,1.4L TU3 / 1.6L TU5,4,Gasolina,Manual 5|Automática 4,13.0
+Peugeot,207,2007,2013,Feline|Allure|Compact|CC,1.4L / 1.6L EP6 / 1.6T,4,Gasolina,Manual 5|Automática 4,13.5
+Peugeot,208,2013,,Active|Allure|GT|e-208,1.2T PureTech / 1.6L EC5 / 1.6T,3|4,Gasolina,Manual 5|Automática 6,16.0
+Peugeot,3008,2010,,Active|Allure|GT,1.6T THP,4,Gasolina,Automática 6,12.5
+Peugeot,301,2014,2020,Active|Allure,1.6L EC5,4,Gasolina,Manual 5|Automática 4|Automática 6,14.0
+Peugeot,307,2002,2012,XS|XT|Feline|SW|CC,1.6L TU5 / 2.0L EW10,4,Gasolina,Manual 5|Automática 4,11.5
+Peugeot,308,2008,2022,Active|Allure|Feline|GT,1.6L / 1.6T THP / 1.2T,4|3,Gasolina,Manual 5|Manual 6|Automática 6,13.5
+Peugeot,Partner,1998,,Maxi|Tepee|Rapid,1.6L TU5 / 1.6 HDi / 1.4L,4,Gasolina|Diésel,Manual 5,12.5
+Pontiac,Sunfire,1995,2005,SE|GT,2.2L / 2.4L,4,Gasolina,Manual 5|Automática 4,11.0
+RAM,1200,2024,,SLT|Laramie,2.4L,4,Gasolina,Manual 6|Automática 6,9.5
+RAM,1500,1994,2008,ST|SLT|Laramie,4.7L V8 / 5.7L HEMI / 5.9L,8,Gasolina,Automática 4|Automática 5,6.0
+RAM,1500,2009,,ST|SLT|Laramie|Rebel|Limited|TRX,3.6L Pentastar / 5.7L HEMI eTorque,6|8,Gasolina,Automática 6|Automática 8,8.0
+RAM,2500,1994,,ST|SLT|Laramie|Power Wagon,5.7L HEMI / 6.4L HEMI / 6.7L Cummins,8|6,Gasolina|Diésel,Automática 6|Automática 8,5.5
+RAM,700,2015,2023,Std|SLT|Doble cabina (Fiat Strada),1.6L E.torQ,4,Gasolina,Manual 5,13.0
+RAM,700,2024,,Std|SLT|Doble cabina,1.3L Firefly,4,Gasolina,Manual 5|CVT,14.5
+Renault,Captur,2018,2022,Zen|Intens|Iconic,2.0L F4R / 1.3T,4,Gasolina,Manual 6|Automática 4|CVT,12.0
+Renault,Clio,2002,2013,Authentique|Expression|Dynamique|Sport,1.6L K7M / K4M,4,Gasolina,Manual 5|Automática 4,13.5
+Renault,Duster,2013,2021,Expression|Dynamique|Zen|Intens,1.6L K4M / 2.0L F4R,4,Gasolina,Manual 5|Manual 6|Automática 4,11.5
+Renault,Duster,2022,,Intens|Iconic,1.6L H4M / 1.3T TCe,4,Gasolina,Manual 5|CVT,13.0
+Renault,Fluence,2011,2017,Expression|Dynamique|Privilege|GT,2.0L M4R / 2.0T,4,Gasolina,Manual 6|CVT,12.0
+Renault,Kangoo,2004,,Express|Zen|Furgón,1.6L K4M / K7M,4,Gasolina,Manual 5,11.5
+Renault,Koleos,2009,,Expression|Dynamique|Iconic,2.5L QR25DE (Nissan),4,Gasolina,CVT,10.5
+Renault,Kwid,2019,,Life|Zen|Intens|Outsider,1.0L SCe B4D,3,Gasolina,Manual 5,21.0
+Renault,Logan,2015,2021,Life|Zen|Intens,1.6L K4M / H4M,4,Gasolina,Manual 5|Automática 4,14.5
+Renault,Megane,2001,2013,Expression|Dynamique|Privilege|RS,1.6L / 2.0L F4R,4,Gasolina,Manual 5|Automática 4|CVT,11.5
+Renault,Oroch,2016,,Zen|Intens|Outsider,1.6L K4M / 2.0L F4R / 1.3T,4,Gasolina,Manual 5|Manual 6|Automática 4,11.5
+Renault,Sandero,2009,2021,Expression|Dynamique|Life|Zen|Intens|RS,1.6L K7M / K4M / H4M,4,Gasolina,Manual 5|Automática 4|CVT,14.0
+Renault,Scénic,2001,2010,Expression|Dynamique|Privilege,1.6L / 2.0L F4R,4,Gasolina,Manual 5|Automática 4,10.5
+Renault,Stepway,2009,,Expression|Dynamique|Zen|Intens,1.6L K4M / H4M,4,Gasolina,Manual 5|Automática 4|CVT,13.5
+SEAT,Arona,2018,,Reference|Style|Xperience|FR,1.6L MPI / 1.0T TSI,4|3,Gasolina,Manual 5|Tiptronic 6|DSG 7,15.0
+SEAT,Ateca,2017,,Style|Xcellence|FR,1.4T TSI / 1.5T TSI,4,Gasolina,Tiptronic 6|DSG 7,13.5
+SEAT,Córdoba,1999,2009,Reference|Signo|Stylance,1.6L / 2.0L,4,Gasolina,Manual 5|Automática 4,12.0
+SEAT,Ibiza,1999,2017,Reference|Stylance|Sport|FR|Cupra,1.6L / 2.0L / 1.2T TSI / 1.4T,4,Gasolina,Manual 5|Tiptronic 6|DSG 7,13.5
+SEAT,Ibiza,2018,,Reference|Style|Xcellence|FR,1.6L MPI / 1.0T TSI,4|3,Gasolina,Manual 5|Tiptronic 6|DSG 7,16.0
+SEAT,León,1999,,Reference|Style|FR|Cupra,1.6L / 1.8T / 1.4T TSI / 2.0T TSI,4,Gasolina,Manual 5|Manual 6|DSG 6|DSG 7,13.0
+SEAT,Toledo,1999,2017,Stylance|Signo|Style|Reference,1.6L / 2.0L / 1.2T TSI,4,Gasolina,Manual 5|Tiptronic 6|DSG 7,13.5
+Subaru,Forester,2004,,XS|XT|Limited|Sport,2.0L / 2.5L bóxer / 2.0T,4,Gasolina,Manual 5|Automática 4|CVT,11.5
+Suzuki,Baleno,2023,,GL|GLX,1.5L K15B,4,Gasolina,Manual 5|Automática 4,18.0
+Suzuki,Ciaz,2016,2023,GLS|GLX,1.4L K14B / 1.5L K15B,4,Gasolina,Manual 5|Automática 4,17.0
+Suzuki,Dzire,2025,,GL|GLX,1.2L Z12E,3,Gasolina,Manual 5|AGS,21.0
+Suzuki,Ertiga,2016,,GA|GLS|GLX|Hybrid,1.4L K14B / 1.5L K15B,4,Gasolina|Híbrido,Manual 5|Automática 4|Automática 6,15.0
+Suzuki,Fronx,2024,,GL|GLX|Boosterjet Hybrid,1.5L K15C / 1.0T Híbrido ligero,4|3,Gasolina|Híbrido,Manual 5|Automática 6,18.5
+Suzuki,Grand Vitara,2005,2015,GLS|GLX|Sport,2.0L / 2.4L J24B,4,Gasolina,Manual 5|Automática 4,9.5
+Suzuki,Grand Vitara,2023,,GLX|Hybrid,1.5L K15C Híbrido ligero,4,Gasolina|Híbrido,Manual 5|Automática 6,16.5
+Suzuki,Ignis,2018,,GL|GLX,1.2L K12M,4,Gasolina,Manual 5|AGS,19.0
+Suzuki,Jimny,2019,,GLX|Five Door,1.5L K15B,4,Gasolina,Manual 5|Automática 4,13.5
+Suzuki,SX4,2007,2014,GLS|GLX|Crossover|Sedán,2.0L J20A,4,Gasolina,Manual 5|Automática 4|CVT,12.0
+Suzuki,Swift,2005,2017,GA|GL|GLX|Sport,1.5L M15A / 1.6L,4,Gasolina,Manual 5|Automática 4,14.5
+Suzuki,Swift,2018,,GL|GLX|Boosterjet|Sport,1.2L K12 / 1.0T Boosterjet / 1.4T,4|3,Gasolina,Manual 5|CVT|Automática 6,20.0
+Toyota,4Runner,2002,,SR5|Limited|TRD Off-Road,4.0L V6 1GR-FE,6,Gasolina,Automática 5,7.5
+Toyota,Avanza,2008,,Cargo|LE|XLE|Premium,1.5L 2NR-VE / 1.3L,4,Gasolina,Manual 5|Automática 4|CVT,14.0
+Toyota,C-HR,2018,2021,Base|Premium,2.0L 3ZR-FAE,4,Gasolina,CVT,14.0
+Toyota,Camry,2002,2017,LE|XLE|SE|V6,2.4L / 2.5L / 3.5L V6,4|6,Gasolina,Automática 5|Automática 6,11.0
+Toyota,Camry,2018,,LE|XSE|Hybrid,2.5L A25A / 2.5 Híbrido,4,Gasolina|Híbrido,Automática 8|eCVT,15.0
+Toyota,Corolla,2002,2013,CE|LE|XLE|S,1.8L 1ZZ-FE / 2ZR-FE,4,Gasolina,Manual 5|Automática 4,13.0
+Toyota,Corolla,2014,2019,Base|LE|SE|XLE,1.8L 2ZR-FE,4,Gasolina,Manual 6|CVT,15.5
+Toyota,Corolla,2020,,Base|LE|SE|Hybrid,2.0L M20A / 1.8 Híbrido,4,Gasolina|Híbrido,CVT|eCVT,16.5
+Toyota,Corolla Cross,2022,,Base|XLE|Hybrid,2.0L M20A / 1.8 Híbrido,4,Gasolina|Híbrido,CVT|eCVT,15.5
+Toyota,Hiace,2010,,Panel|Pasajeros 12|15,2.7L 2TR-FE / 2.8 Diésel,4,Gasolina|Diésel,Manual 5|Manual 6,8.5
+Toyota,Highlander,2008,,Base|Limited|Hybrid,3.5L V6 / 2.4T / 2.5 Híbrido,6|4,Gasolina|Híbrido,Automática 6|Automática 8|eCVT,9.5
+Toyota,Hilux,2006,2015,Chasis|Cabina sencilla|Doble cabina,2.7L 2TR-FE,4,Gasolina,Manual 5,9.0
+Toyota,Hilux,2016,,Chasis|Doble cabina|Diésel 4x4,2.7L 2TR-FE / 2.8L 1GD Diésel,4,Gasolina|Diésel,Manual 5|Manual 6|Automática 6,10.5
+Toyota,Prius,2005,,Base|Premium|C,1.8L Híbrido 2ZR-FXE,4,Híbrido,eCVT,24.0
+Toyota,RAV4,2002,2018,Base|Limited|Sport,2.4L / 2.5L 2AR-FE,4,Gasolina,Automática 4|Automática 6,10.5
+Toyota,RAV4,2019,,XLE|Adventure|Limited|Hybrid,2.5L A25A / 2.5 Híbrido,4,Gasolina|Híbrido,Automática 8|eCVT,14.5
+Toyota,Raize,2022,,LE|XLE,1.0T 1KR-VET,3,Gasolina,Manual 5|CVT,17.5
+Toyota,Sienna,2004,2020,CE|LE|XLE|Limited,3.5L V6 2GR-FE,6,Gasolina,Automática 5|Automática 8,8.5
+Toyota,Sienna,2021,,LE|XLE|Limited (Híbrido),2.5 Híbrido,4,Híbrido,eCVT,15.0
+Toyota,Tacoma,2005,,Base|TRD Sport|TRD Off-Road|TRD Pro,2.7L / 3.5L V6 / 2.4T,4|6,Gasolina,Manual 6|Automática 6|Automática 8,8.5
+Toyota,Tundra,2006,,SR5|Limited|Platinum|TRD Pro,5.7L V8 / 3.5T V6,8|6,Gasolina,Automática 6|Automática 10,6.8
+Toyota,Yaris,2006,2015,Core|Premium|Sedán,1.5L 1NZ-FE,4,Gasolina,Manual 5|Automática 4,14.5
+Toyota,Yaris,2016,,Core|S|SD (sedán),1.5L 2NR-FE,4,Gasolina,Manual 5|CVT,17.0
+Volkswagen,Amarok,2011,,Trendline|Highline|V6,2.0 TDI / 3.0 V6 TDI,4|6,Diésel,Manual 6|Automática 8,11.0
+Volkswagen,Beetle,1998,2011,GL|GLS|Sport|Cabrio,2.0L / 1.8T / 2.5L,4|5,Gasolina,Manual 5|Tiptronic 6,11.0
+Volkswagen,Beetle,2012,2019,Sportline|Design|Turbo|Final Edition,2.5L / 1.4T / 2.0T,5|4,Gasolina,Manual 5|Tiptronic 6|DSG,12.5
+Volkswagen,Bora,2005,2010,Style|Sport|Active,2.5L,5,Gasolina,Manual 5|Tiptronic 6,11.0
+Volkswagen,Combi,1990,2002,Pasajeros|Panel,1.6L / 1.8L bóxer,4,Gasolina,Manual 4,8.0
+Volkswagen,Crafter,2007,,Cargo|Pasajeros|Chasis,2.0 TDI,4,Diésel,Manual 6,9.5
+Volkswagen,CrossFox,2005,2017,Std|Comfortline,1.6L,4,Gasolina,Manual 5|I-Motion,12.5
+Volkswagen,Derby,1995,2009,Std|Trendline|Comfortline,1.8L / 2.0L,4,Gasolina,Manual 5|Automática 4,12.0
+Volkswagen,Gol,2009,2023,Power|Trendline|Comfortline|Sedán,1.6L,4,Gasolina,Manual 5|I-Motion,14.0
+Volkswagen,Golf,1990,1999,A2|A3 GL|GTI,1.8L / 2.0L,4,Gasolina,Manual 5|Automática 4,11.5
+Volkswagen,Golf,2000,2009,A4|A5 Style|GTI,2.0L / 1.8T / 2.5L,4|5,Gasolina,Manual 5|Tiptronic 6,11.5
+Volkswagen,Golf,2010,,Comfortline|Highline|GTI,1.4T TSI / 2.0T TSI,4,Gasolina,Manual 6|DSG 7,14.5
+Volkswagen,Jetta,1990,1998,A2|A3 GL|GLS|VR6,1.8L / 2.0L / 2.8L VR6,4|6,Gasolina,Manual 5|Automática 4,11.0
+Volkswagen,Jetta,1999,2010,A4 Std|GL|GLS|1.8T|TDI,2.0L / 1.8T / 1.9 TDI,4,Gasolina|Diésel,Manual 5|Tiptronic 6,12.0
+Volkswagen,Jetta,2011,2018,A6 Style|Sport|GLI|TDI,2.5L / 1.4T / 2.0T,5|4,Gasolina|Diésel,Manual 5|Tiptronic 6|DSG 6,13.5
+Volkswagen,Jetta,2019,,A7 Trendline|Comfortline|Highline|GLI,1.4T TSI / 1.5T / 2.0T GLI,4,Gasolina,Manual 6|Tiptronic 8|DSG 7,16.0
+Volkswagen,Jetta Clásico,2007,2015,Std|CL|GLS|Team,2.0L,4,Gasolina,Manual 5|Tiptronic 6,11.8
+Volkswagen,Passat,1998,2010,GL|GLS|V6|CC,1.8T / 2.0T / 2.8L VR6,4|6,Gasolina,Manual 5|Tiptronic 6,10.5
+Volkswagen,Passat,2012,,Comfortline|Highline|R-Line,2.5L / 1.8T / 2.0T,5|4,Gasolina,Tiptronic 6|DSG 6,12.5
+Volkswagen,Pointer,1998,2010,City|GTI|Wagon|Pick Up,1.6L / 1.8L,4,Gasolina,Manual 5,12.5
+Volkswagen,Polo,2003,2017,Std|Comfortline|Highline|GTI,1.6L,4,Gasolina,Manual 5|Tiptronic 6,13.5
+Volkswagen,Polo,2018,2023,Startline|Trendline|Comfortline,1.6L,4,Gasolina,Manual 5|Tiptronic 6,15.0
+Volkswagen,Saveiro,2010,,Robust|Startline|Cross,1.6L,4,Gasolina,Manual 5,13.0
+Volkswagen,Sedán,1990,2003,Std|Edición Especial|Última Edición,1.6L bóxer (enfriado por aire),4,Gasolina,Manual 4,11.5
+Volkswagen,T-Cross,2020,2025,Trendline|Comfortline|Highline,1.6L / 1.0T,4|3,Gasolina,Manual 5|Tiptronic 6,15.0
+Volkswagen,Taos,2021,,Trendline|Comfortline|Highline,1.4T TSI,4,Gasolina,Manual 6|Tiptronic 8|DSG 7,14.5
+Volkswagen,Teramont,2018,,Trendline|Comfortline|Highline,2.0T / 3.6L VR6,4|6,Gasolina,Tiptronic 8,9.0
+Volkswagen,Tiguan,2009,2017,Native|Sport|Track & Fun,2.0T TSI,4,Gasolina,Tiptronic 6,10.5
+Volkswagen,Tiguan,2018,,Trendline|Comfortline|Highline|R-Line,1.4T / 2.0T TSI,4,Gasolina,DSG 6|Tiptronic 8,12.5
+Volkswagen,Transporter,2004,,Pasajeros|Panel|Chasis,2.0L TDI / 2.0T TSI,4,Diésel|Gasolina,Manual 6|DSG 7,10.5
+Volkswagen,Vento,2014,2022,Startline|Comfortline|Highline|TDI,1.6L / 1.2T / 1.5 TDI,4,Gasolina|Diésel,Manual 5|Tiptronic 6|DSG 7,15.0
+Volkswagen,Virtus,2023,,Trendline|Comfortline|Highline|GTS,1.6L / 1.0T / 1.4T,4|3,Gasolina,Manual 5|Tiptronic 6,16.0
