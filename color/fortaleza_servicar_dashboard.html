@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortaleza Servicar - Dashboard Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Variables de Color para las 3 Paletas (Rojo, Negro, Blanco) */
+        :root {
+            /* Tema 1: Rojo Deportivo (Default) */
+            --bg-body: #F2F1EF;
+            --bg-sidebar: #1E1E1E;
+            --bg-card: #FFFFFF;
+            --color-primary: #9C2327;
+            --color-primary-hover: #7D1B1E;
+            --color-accent: #232222;
+            --color-text-main: #222222;
+            --color-text-muted: #666666;
+            --color-text-sidebar: #EEEEEE;
+            --border-color: #E2E8F0;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="stealth"] {
+            /* Tema 2: Rojo Stealth (Oscuro) */
+            --bg-body: #0D0D0D;
+            --bg-sidebar: #050505;
+            --bg-card: #161616;
+            --color-primary: #E63946;
+            --color-primary-hover: #C52A36;
+            --color-accent: #252525;
+            --color-text-main: #F3F4F6;
+            --color-text-muted: #9CA3AF;
+            --color-text-sidebar: #F3F4F6;
+            --border-color: #2A2A2A;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="classic"] {
+            /* Tema 3: Rojo Clásico Blanco */
+            --bg-body: #F8FAFC;
+            --bg-sidebar: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --color-primary: #C0392B;
+            --color-primary-hover: #962D22;
+            --color-accent: #334155;
+            --color-text-main: #0F172A;
+            --color-text-muted: #64748B;
+            --color-text-sidebar: #334155;
+            --border-color: #E2E8F0;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--color-text-main);
+            transition: background-color 0.35s ease, color 0.35s ease;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .sidebar {
+            background-color: var(--bg-sidebar);
+            color: var(--color-text-sidebar);
+            transition: background-color 0.35s ease;
+        }
+        
+        .sidebar-item {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.06);
+            border-left-color: var(--color-primary);
+            color: #FFFFFF;
+        }
+
+        [data-theme="classic"] .sidebar-item:hover, 
+        [data-theme="classic"] .sidebar-item.active {
+            background-color: rgba(192, 57, 43, 0.08);
+            color: var(--color-primary);
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            transition: background-color 0.35s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.35s ease;
+        }
+
+        /* Microinteracción de Magnificación */
+        .card-hover:hover {
+            transform: translateY(-3px) scale(1.015);
+            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.12);
+            border-color: rgba(156, 35, 39, 0.3);
+            z-index: 5;
+        }
+
+        .text-primary-custom { color: var(--color-primary); }
+        .bg-primary-custom { background-color: var(--color-primary); }
+        .bg-primary-custom:hover { background-color: var(--color-primary-hover); }
+        .border-custom { border-color: var(--border-color); }
+        .text-muted-custom { color: var(--color-text-muted); }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+            color: var(--color-text-main);
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .btn-action:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            transform: translateY(-1px);
+        }
+
+        .theme-pill {
+            transition: all 0.25s ease;
+            opacity: 0.6;
+        }
+        .theme-pill.active {
+            opacity: 1;
+            background-color: var(--color-primary);
+            color: #FFFFFF !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Shared Element Tab Indicator */
+        .tab-btn {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--color-primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navegación -->
+    <aside class="sidebar w-64 flex flex-col shrink-0 border-r border-custom z-20 shadow-xl">
+        <!-- Logo Brand -->
+        <div class="h-16 flex items-center px-6 border-b border-custom justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-primary-custom flex items-center justify-center text-white font-black text-lg shadow-md">
+                    F
+                </div>
+                <div>
+                    <h1 class="text-base font-bold leading-tight">Fortaleza</h1>
+                    <p class="text-xs text-primary-custom font-semibold tracking-wider uppercase">Servicar</p>
+                </div>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded bg-black/20 text-muted-custom font-mono">v2.4</span>
+        </div>
+
+        <!-- Usuario Contextual (Imagen 2 & 3) -->
+        <div class="p-4 mx-3 my-3 rounded-xl card flex items-center space-x-3">
+            <div class="relative">
+                <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-sm">
+                    A
+                </div>
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-semibold truncate">Administrador</p>
+                <p class="text-xs text-muted-custom truncate">Taller Principal • Online</p>
+            </div>
+        </div>
+
+        <!-- Menu Links -->
+        <nav class="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+            <p class="px-4 text-[10px] font-bold uppercase tracking-wider text-muted-custom mb-1">Principal</p>
+            <a href="#" class="sidebar-item active flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-th-large w-5 text-center mr-3 text-primary-custom"></i> Tablero General
+            </a>
+
+            <p class="px-4 text-[10px] font-bold uppercase tracking-wider text-muted-custom mt-4 mb-1">Taller & Inventario</p>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-car w-5 text-center mr-3 opacity-70"></i> Vehículos en Piso
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-file-invoice w-5 text-center mr-3 opacity-70"></i> Órdenes de Servicio
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-boxes w-5 text-center mr-3 opacity-70"></i> Refacciones
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-users-cog w-5 text-center mr-3 opacity-70"></i> Personal & Clientes
+            </a>
+
+            <p class="px-4 text-[10px] font-bold uppercase tracking-wider text-muted-custom mt-4 mb-1">Finanzas & Control</p>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-file-signature w-5 text-center mr-3 opacity-70"></i> Cotizaciones
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-chart-line w-5 text-center mr-3 opacity-70"></i> Reportes Financieros
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-2.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-cog w-5 text-center mr-3 opacity-70"></i> Configuración
+            </a>
+        </nav>
+
+        <!-- Dynamic Theme Selector Control in Sidebar Footer -->
+        <div class="p-3 border-t border-custom m-2">
+            <p class="text-[11px] font-semibold text-muted-custom mb-2 text-center uppercase tracking-wider">Estilo de Color</p>
+            <div class="grid grid-cols-3 gap-1 p-1 rounded-xl bg-black/10 border border-custom">
+                <button onclick="setTheme('default', this)" class="theme-pill active py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1" title="Rojo Deportivo">
+                    <span class="w-2 h-2 rounded-full bg-[#9C2327]"></span> Rep.
+                </button>
+                <button onclick="setTheme('stealth', this)" class="theme-pill py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1" title="Rojo Stealth / Oscuro">
+                    <span class="w-2 h-2 rounded-full bg-[#E63946]"></span> Dark
+                </button>
+                <button onclick="setTheme('classic', this)" class="theme-pill py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1" title="Rojo Clásico">
+                    <span class="w-2 h-2 rounded-full bg-[#C0392B]"></span> Light
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Content Region -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Header Navigation (Imagen 2 & 3) -->
+        <header class="h-16 card border-b flex items-center justify-between px-6 z-10 shrink-0">
+            <!-- Search Control -->
+            <div class="flex items-center w-1/3">
+                <div class="relative w-full max-w-md">
+                    <i class="fas fa-search absolute left-3.5 top-3 text-muted-custom text-sm"></i>
+                    <input type="text" placeholder="Buscar personas, equipos, líneas, órdenes..." class="w-full border border-custom rounded-full pl-10 pr-10 py-1.5 text-sm focus:outline-none focus:border-primary-custom transition-all" style="background-color: var(--bg-body); color: var(--color-text-main);">
+                    <span class="absolute right-3 top-2 text-xs text-muted-custom border border-custom rounded px-1.5">/</span>
+                </div>
+            </div>
+
+            <!-- Header Quick Info & Actions -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 text-xs font-medium text-muted-custom mr-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Taller Activo</span>
+                </div>
+
+                <button class="relative p-2 rounded-lg text-muted-custom hover:text-primary-custom transition-colors">
+                    <i class="far fa-bell text-lg"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+
+                <button class="bg-primary-custom text-white font-medium text-sm py-2 px-4 rounded-lg flex items-center space-x-2 transition-all shadow-sm">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nueva Orden</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Area -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+            <!-- Section Title & Period Selector -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Tablero Fortaleza Servicar</h1>
+                    <p class="text-sm text-muted-custom mt-0.5">Resumen general de servicios, refacciones, clientes y alertas operativas.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="btn-action cursor-pointer">
+                        <i class="far fa-calendar-alt text-primary-custom"></i>
+                        <span>Periodo: 01/10 - 31/10</span>
+                    </div>
+                    <button class="btn-action" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Access Toolbar (Direct Action Buttons) -->
+            <div class="flex flex-wrap items-center gap-2.5 pb-1 border-b border-custom">
+                <button class="btn-action"><i class="fas fa-file-signature text-primary-custom"></i> + Cotización</button>
+                <button class="btn-action"><i class="fas fa-car-side text-blue-500"></i> Recepción de Vehículo</button>
+                <button class="btn-action"><i class="fas fa-cash-register text-emerald-500"></i> Venta Directa</button>
+                <button class="btn-action"><i class="fas fa-receipt text-purple-500"></i> Factura de Compra</button>
+                <button class="btn-action"><i class="fas fa-clock text-amber-500"></i> Recordatorios</button>
+            </div>
+
+            <!-- Top Metric Health Cards (Referencia Imagen 1, 4 & 5) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                
+                <div class="card card-hover p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-muted-custom uppercase tracking-wider">Clientes</span>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-sm">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-extrabold tracking-tight">24</div>
+                        <div class="flex items-center text-xs text-emerald-500 font-medium mt-1">
+                            <i class="fas fa-arrow-up mr-1"></i> +12% este mes
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-hover p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-muted-custom uppercase tracking-wider">Servicios Activos</span>
+                        <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-extrabold tracking-tight">8</div>
+                        <div class="flex items-center text-xs text-blue-500 font-medium mt-1">
+                            <i class="fas fa-car mr-1"></i> 3 en rampa
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-hover p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-muted-custom uppercase tracking-wider">Ingresos Mes</span>
+                        <div class="w-8 h-8 rounded-xl bg-primary-custom/10 text-primary-custom flex items-center justify-center text-sm">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-extrabold tracking-tight">$48,650</div>
+                        <div class="flex items-center text-xs text-emerald-500 font-medium mt-1">
+                            <i class="fas fa-arrow-up mr-1"></i> +8.4% meta
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-hover p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-muted-custom uppercase tracking-wider">Por Cobrar</span>
+                        <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-extrabold tracking-tight">$12,400</div>
+                        <div class="flex items-center text-xs text-amber-500 font-medium mt-1">
+                            <i class="fas fa-exclamation-circle mr-1"></i> 3 pendientes
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-hover p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-muted-custom uppercase tracking-wider">Calificación Taller</span>
+                        <div class="w-8 h-8 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center text-sm">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-2xl font-extrabold tracking-tight">4.9</span>
+                            <span class="text-xs text-muted-custom">/ 5.0</span>
+                        </div>
+                        <div class="w-full bg-black/10 rounded-full h-1.5 mt-2 overflow-hidden">
+                            <div class="bg-yellow-400 h-1.5 rounded-full" style="width: 98%"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Alert & Status Strip (Referencia Imagen 1) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="card card-hover p-3.5 rounded-xl flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-500 flex items-center justify-center">
+                            <i class="fas fa-car-alt"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">1 Auto en Piso</p>
+                            <p class="text-xs text-muted-custom">Servicio en proceso</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-muted-custom"></i>
+                </div>
+
+                <div class="card card-hover p-3.5 rounded-xl flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">2 Refacciones Mínimas</p>
+                            <p class="text-xs text-muted-custom">Requiere reorden</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-muted-custom"></i>
+                </div>
+
+                <div class="card card-hover p-3.5 rounded-xl flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">0 Compras por Aprobar</p>
+                            <p class="text-xs text-muted-custom">Todo al día</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-muted-custom"></i>
+                </div>
+
+                <div class="card card-hover p-3.5 rounded-xl flex items-center justify-between cursor-pointer border-l-4 border-l-red-500">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-red-500/15 text-red-500 flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">1 Alerta Crítica</p>
+                            <p class="text-xs text-muted-custom">Aprobación pendiente</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-muted-custom"></i>
+                </div>
+            </div>
+
+            <!-- Middle Section: Visual Charts & Operational Attention (Imagen 2 & 4) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Main Dual Chart Widget (Rendimiento & Flujo) -->
+                <div class="card lg:col-span-2 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-custom gap-2">
+                        <div>
+                            <h2 class="font-bold text-base flex items-center gap-2">
+                                <i class="fas fa-chart-area text-primary-custom"></i> Flujo de Trabajo & Rendimiento Financiero
+                            </h2>
+                            <p class="text-xs text-muted-custom">Comparativa de ingresos vs. órdenes completadas semanalmente.</p>
+                        </div>
+                        <div class="flex items-center space-x-3 text-xs">
+                            <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-red-600 mr-1.5"></span> Ingresos</span>
+                            <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 mr-1.5"></span> Órdenes</span>
+                        </div>
+                    </div>
+
+                    <div class="py-4 relative" style="min-h: 220px;">
+                        <canvas id="performanceChart" height="110"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 pt-3 border-t border-custom text-center text-xs">
+                        <div>
+                            <span class="text-muted-custom block">Promedio diario</span>
+                            <span class="font-bold text-sm">$2,450.00</span>
+                        </div>
+                        <div>
+                            <span class="text-muted-custom block">Efectividad</span>
+                            <span class="font-bold text-sm text-emerald-500">94.2%</span>
+                        </div>
+                        <div>
+                            <span class="text-muted-custom block">Tiempo Medio</span>
+                            <span class="font-bold text-sm">3.5 hrs / auto</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Circular Progress & Attention Center (Imagen 2, 3 & 4) -->
+                <div class="card rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center pb-3 border-b border-custom">
+                            <h2 class="font-bold text-base flex items-center gap-2">
+                                <i class="fas fa-shield-alt text-amber-500"></i> Atención Inmediata
+                            </h2>
+                            <button class="text-xs text-primary-custom hover:underline font-medium">Ver todas</button>
+                        </div>
+
+                        <!-- Donut Metric Chart -->
+                        <div class="my-4 flex items-center justify-center relative">
+                            <div class="w-36 h-36">
+                                <canvas id="donutChart"></canvas>
+                            </div>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <span class="text-2xl font-black">82%</span>
+                                <span class="text-[10px] text-muted-custom uppercase font-semibold">Capacidad</span>
+                            </div>
+                        </div>
+
+                        <!-- Incident List -->
+                        <div class="space-y-2.5">
+                            <div class="p-2.5 rounded-xl bg-black/5 border border-custom flex items-start space-x-3">
+                                <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                                <div class="text-xs flex-1">
+                                    <p class="font-semibold">Freno roto • Nissan Sentra (ABC-123)</p>
+                                    <p class="text-muted-custom">Requiere autorización de cliente para cambio de disco.</p>
+                                </div>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-black/5 border border-custom flex items-start space-x-3">
+                                <i class="fas fa-clock text-amber-500 mt-0.5"></i>
+                                <div class="text-xs flex-1">
+                                    <p class="font-semibold">Entrega próxima (15:00 hrs)</p>
+                                    <p class="text-muted-custom">VW Jetta - Afinación mayor al 90%.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="w-full mt-4 py-2 rounded-xl border border-custom text-xs font-semibold hover:border-primary-custom hover:text-primary-custom transition-all">
+                        <i class="fas fa-check-double mr-1.5"></i> Marcar Pendientes como Vistos
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Accesos Rápidos Modulo (Referencia Imagen 2) -->
+            <div class="card rounded-2xl p-5">
+                <h2 class="font-bold text-base mb-3 flex items-center gap-2">
+                    <i class="fas fa-bolt text-amber-500"></i> Accesos Rápidos
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <button class="p-3 rounded-xl border border-custom hover:border-primary-custom hover:text-primary-custom flex flex-col items-center justify-center gap-2 transition-all bg-black/5 hover:bg-black/0 group">
+                        <i class="fas fa-car-side text-lg text-primary-custom group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-medium text-center">Nuevo Vehículo</span>
+                    </button>
+                    <button class="p-3 rounded-xl border border-custom hover:border-primary-custom hover:text-primary-custom flex flex-col items-center justify-center gap-2 transition-all bg-black/5 hover:bg-black/0 group">
+                        <i class="fas fa-user-plus text-lg text-blue-500 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-medium text-center">Alta de Técnico</span>
+                    </button>
+                    <button class="p-3 rounded-xl border border-custom hover:border-primary-custom hover:text-primary-custom flex flex-col items-center justify-center gap-2 transition-all bg-black/5 hover:bg-black/0 group">
+                        <i class="fas fa-cogs text-lg text-emerald-500 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-medium text-center">Nueva Refacción</span>
+                    </button>
+                    <button class="p-3 rounded-xl border border-custom hover:border-primary-custom hover:text-primary-custom flex flex-col items-center justify-center gap-2 transition-all bg-black/5 hover:bg-black/0 group">
+                        <i class="fas fa-tasks text-lg text-purple-500 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-medium text-center">Asignar Orden</span>
+                    </button>
+                    <button class="p-3 rounded-xl border border-custom hover:border-primary-custom hover:text-primary-custom flex flex-col items-center justify-center gap-2 transition-all bg-black/5 hover:bg-black/0 group">
+                        <i class="fas fa-sticky-note text-lg text-amber-500 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-medium text-center">Reporte Express</span>
+                    </button>
+                    <button class="p-3 rounded-xl border border-custom hover:border-primary-custom hover:text-primary-custom flex flex-col items-center justify-center gap-2 transition-all bg-black/5 hover:bg-black/0 group">
+                        <i class="fas fa-file-excel text-lg text-emerald-600 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-medium text-center">Exportar Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Equipo & Personal de Taller Table (Referencia Imagen 3) -->
+            <div class="card rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-custom flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="font-bold text-base">Personal de Taller & Accesos</h2>
+                        <p class="text-xs text-muted-custom">Cuentas con acceso activo al sistema de inventario y taller.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="btn-action"><i class="fas fa-key text-xs"></i> Mi clave</button>
+                        <button class="bg-primary-custom text-white text-xs font-medium py-2 px-3 rounded-lg flex items-center space-x-1.5">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Agregar integrante</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="uppercase tracking-wider border-b border-custom text-muted-custom bg-black/5">
+                            <tr>
+                                <th class="p-3.5">Usuario</th>
+                                <th class="p-3.5">Nombre Integrante</th>
+                                <th class="p-3.5">Rol Taller</th>
+                                <th class="p-3.5">Estatus</th>
+                                <th class="p-3.5">Último Acceso</th>
+                                <th class="p-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-custom">
+                            <tr class="hover:bg-black/5 transition-colors">
+                                <td class="p-3.5 font-mono font-semibold text-primary-custom">admin_fortaleza</td>
+                                <td class="p-3.5">
+                                    <div class="flex items-center space-x-2.5">
+                                        <div class="w-7 h-7 rounded-full bg-slate-700 text-white font-bold flex items-center justify-center text-xs">A</div>
+                                        <span class="font-semibold">Carlos Mendoza</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-primary-custom/10 text-primary-custom font-bold text-[10px]">Tú</span>
+                                    </div>
+                                </td>
+                                <td class="p-3.5">
+                                    <span class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-500 font-semibold text-[11px]">Administrador General</span>
+                                </td>
+                                <td class="p-3.5">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-semibold text-[11px]">Activo</span>
+                                </td>
+                                <td class="p-3.5 text-muted-custom">28/10/2026, 11:50:43 a.m.</td>
+                                <td class="p-3.5 text-right">
+                                    <button class="text-muted-custom hover:text-primary-custom p-1"><i class="fas fa-ellipsis-v"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-black/5 transition-colors">
+                                <td class="p-3.5 font-mono font-semibold">tec_rampa1</td>
+                                <td class="p-3.5">
+                                    <div class="flex items-center space-x-2.5">
+                                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs">J</div>
+                                        <span class="font-semibold">Jorge Ramírez</span>
+                                    </div>
+                                </td>
+                                <td class="p-3.5">
+                                    <span class="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-500 font-semibold text-[11px]">Técnico Lead</span>
+                                </td>
+                                <td class="p-3.5">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-semibold text-[11px]">Activo</span>
+                                </td>
+                                <td class="p-3.5 text-muted-custom">28/10/2026, 10:12:05 a.m.</td>
+                                <td class="p-3.5 text-right">
+                                    <button class="text-muted-custom hover:text-primary-custom p-1"><i class="fas fa-ellipsis-v"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-black/5 transition-colors">
+                                <td class="p-3.5 font-mono font-semibold">recepcion_1</td>
+                                <td class="p-3.5">
+                                    <div class="flex items-center space-x-2.5">
+                                        <div class="w-7 h-7 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs">M</div>
+                                        <span class="font-semibold">María Elena Torres</span>
+                                    </div>
+                                </td>
+                                <td class="p-3.5">
+                                    <span class="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-500 font-semibold text-[11px]">Captura & Recepción</span>
+                                </td>
+                                <td class="p-3.5">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 font-semibold text-[11px]">Activo</span>
+                                </td>
+                                <td class="p-3.5 text-muted-custom">27/10/2026, 06:30:18 p.m.</td>
+                                <td class="p-3.5 text-right">
+                                    <button class="text-muted-custom hover:text-primary-custom p-1"><i class="fas fa-ellipsis-v"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JavaScript Controller -->
+    <script>
+        let perfChart, donutChart;
+
+        // Dynamic Theme Switcher Controller
+        function setTheme(themeName, btnElement) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            
+            // Update active state on theme switcher buttons
+            document.querySelectorAll('.theme-pill').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) {
+                btnElement.classList.add('active');
+            }
+
+            // Re-render charts to adjust text & grid colors dynamically
+            updateCharts();
+        }
+
+        function getThemeColors() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'stealth';
+            return {
+                text: isDark ? '#9CA3AF' : '#64748B',
+                grid: isDark ? '#252525' : '#E2E8F0',
+                primary: isDark ? '#E63946' : '#9C2327'
+            };
+        }
+
+        function initCharts() {
+            const colors = getThemeColors();
+
+            // 1. Dual Line / Bar Performance Chart
+            const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+            perfChart = new Chart(ctxPerf, {
+                type: 'line',
+                data: {
+                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                    datasets: [
+                        {
+                            label: 'Ingresos ($)',
+                            data: [12000, 18500, 14200, 24000],
+                            borderColor: colors.primary,
+                            backgroundColor: 'rgba(156, 35, 39, 0.12)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Órdenes Completadas',
+                            data: [8, 14, 10, 18],
+                            borderColor: '#64748B',
+                            borderDash: [4, 4],
+                            tension: 0.35,
+                            borderWidth: 2,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: colors.grid }, ticks: { color: colors.text } },
+                        y: { grid: { color: colors.grid }, ticks: { color: colors.text } },
+                        y1: { position: 'right', grid: { display: false }, ticks: { color: colors.text } }
+                    }
+                }
+            });
+
+            // 2. Donut Workshop Capacity Chart
+            const ctxDonut = document.getElementById('donutChart').getContext('2d');
+            donutChart = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ocupado', 'Disponible'],
+                    datasets: [{
+                        data: [82, 18],
+                        backgroundColor: [colors.primary, 'rgba(100, 116, 139, 0.15)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '78%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (!perfChart || !donutChart) return;
+            const colors = getThemeColors();
+
+            perfChart.data.datasets[0].borderColor = colors.primary;
+            perfChart.options.scales.x.grid.color = colors.grid;
+            perfChart.options.scales.x.ticks.color = colors.text;
+            perfChart.options.scales.y.grid.color = colors.grid;
+            perfChart.options.scales.y.ticks.color = colors.text;
+            perfChart.options.scales.y1.ticks.color = colors.text;
+            perfChart.update();
+
+            donutChart.data.datasets[0].backgroundColor[0] = colors.primary;
+            donutChart.update();
+        }
+
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+</body>
+</html>
