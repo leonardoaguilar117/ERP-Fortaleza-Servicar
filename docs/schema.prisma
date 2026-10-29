@@ -1,0 +1,865 @@
+// Fortaleza Servicar ERP · modelo de datos (borrador de la fase 1)
+// Se copiará a apps/api/prisma/schema.prisma. Las reglas de negocio están en especificación §3; cómo se reflejan en las
+// tablas y qué restricciones van en SQL, en docs/modelo-de-datos.md.
+//
+// Lo que este esquema hace cumplir:
+//  - Cliente 1─N Orden (el servicio completo) 1─N Folio (cada carro). El cliente de la orden, del folio y del
+//    vehículo es siempre el mismo (llaves foráneas compuestas).
+//  - El estatus vive en el folio. La orden no tiene estatus: lo calcula de sus folios. Las partidas no tienen estatus.
+//  - Un técnico, una asignación activa a la vez; un folio, varios técnicos (índice único parcial en SQL).
+//  - Dinero en centavos enteros (*Cents) y tasas en puntos base (*Bp). Parámetros en BranchSetting, nunca en código.
+//  - Nada se borra: bajas lógicas (removedAt, isActive), reversos de pagos y auditoría de solo inserción.
+//  - Toda entidad operativa lleva branchId.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+// Los permisos de cada rol los edita Administración (RolePermission); el rol solo nombra el puesto.
+enum Role {
+  ADMIN
+  ADVISOR
+  TECHNICIAN
+}
+
+enum BodyType {
+  SEDAN
+  HATCHBACK
+  SUV
+  PICKUP
+  VAN
+  MINIVAN
+  COUPE
+  CONVERTIBLE
+  WAGON
+}
+
+enum FuelType {
+  GASOLINA
+  DIESEL
+  HIBRIDO
+  ELECTRICO
+}
+
+// Una sola máquina de estados, aplicada a cada folio (especificación §3.2)
+enum FolioStatus {
+  RECEIVED
+  DIAGNOSING
+  QUOTED
+  AUTHORIZED
+  REPAIRING
+  WAITING_PART
+  FINISHED
+  DELIVERED
+  CANCELLED
+}
+
+enum LineType {
+  LABOR  // mano de obra
+  PART   // concepto de refacciones: texto libre, sin inventario
+  SUBLET // TOT: trabajo en otro taller o gasto externo
+}
+
+enum FuelLevel {
+  RESERVE
+  QUARTER
+  HALF
+  THREE_QUARTERS
+  FULL
+}
+
+enum CheckState {
+  UNCHECKED // el checklist nunca arranca en "Bien"
+  OK
+  DAMAGED
+  MISSING
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  MERCADOPAGO // comisión 2.9 % + IVA de la comisión
+  BBVA        // comisión 2.1 % + IVA de la comisión
+}
+
+enum PaymentKind {
+  DEPOSIT    // anticipo
+  SETTLEMENT // liquidación
+  REVERSAL   // reverso: el dinero no se borra, se contrarresta
+}
+
+enum AuthChannel {
+  STAFF  // registrada en el taller
+  PORTAL // autorizada por el cliente con código
+}
+
+enum OtpPurpose {
+  AUTHORIZE_QUOTE
+}
+
+enum Channel {
+  WHATSAPP // solo el enlace de seguimiento (wa.me)
+  SMS      // código del portal
+  EMAIL    // recordatorio de servicio
+}
+
+enum AccountKind {
+  CASH
+  BANK
+}
+
+enum MovementKind {
+  INCOME
+  EXPENSE
+}
+
+enum AppointmentReason {
+  SERVICE
+  DIAGNOSIS
+  REVIEW
+  QUOTE
+  DELIVERY // ligada a un folio: al entregar el carro queda como atendida
+}
+
+enum AppointmentStatus {
+  PENDING   // por confirmar
+  CONFIRMED
+  ATTENDED
+  NO_SHOW
+  CANCELLED
+}
+
+// ───────────────────────── Sucursal, configuración y personal ─────────────────────────
+
+model Branch {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  code      String   @unique // prefijo de los códigos, p. ej. "FS"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  setting         BranchSetting?
+  counters        ServiceCounter[]
+  users           User[]
+  rolePermissions RolePermission[]
+  customers       Customer[]
+  vehicles        Vehicle[]
+  orders          ServiceOrder[]
+  folios          Folio[]
+  suppliers       Supplier[]
+  catalogItems    ServiceCatalogItem[]
+  accounts        CashAccount[]
+  expenses        Expense[]
+  movements       AccountMovement[]
+  appointments    Appointment[]
+
+  @@map("branches")
+}
+
+// Parámetros del negocio (especificación §3.4). Se cambian aquí, nunca en el código.
+model BranchSetting {
+  branchId String @id @db.Uuid
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  legalName     String? // datos del prestador para el formato PROFECO
+  rfc           String? // RFC del taller (no de los clientes)
+  address       String?
+  phone         String?
+  businessHours String?
+
+  ivaRateBp            Int @default(1600)  // 16 %; también es el IVA de la comisión
+  partsMarginBp        Int @default(3000)  // utilidad de refacciones = 30 % del costo
+  laborRateCents       Int @default(40000) // $400.00 por hora de mano de obra
+  mercadopagoFeeBp     Int @default(290)
+  bbvaFeeBp            Int @default(210)
+  reminderMonths       Int @default(6)     // recordatorio por correo: de 3 a 6 meses (CHECK en SQL)
+  stalledDaysAlert     Int @default(3)     // aviso: carro con más de N días en el taller
+  quoteNoReplyHours    Int @default(24)    // aviso: cotización sin respuesta
+  nextOrderNumber      Int @default(2827)  // sugerencia editable; no es único
+  portalTokenTtlDays   Int @default(30)    // vigencia del enlace después de la última entrega
+
+  @@map("branch_settings")
+}
+
+// Consecutivo atómico por sucursal y año para serviceCode (FS-26-000123)
+model ServiceCounter {
+  branchId String @db.Uuid
+  branch   Branch @relation(fields: [branchId], references: [id])
+  year     Int
+  last     Int    @default(0)
+
+  @@id([branchId, year])
+  @@map("service_counters")
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  branchId      String    @db.Uuid
+  branch        Branch    @relation(fields: [branchId], references: [id])
+  name          String
+  email         String    @unique
+  phone         String?
+  passwordHash  String // Argon2id
+  role          Role
+  pinHash       String? // desbloqueo rápido de la tablet
+  totpSecretEnc String? // MFA, obligatorio para ADMIN
+  avatarKey     String? // foto de perfil de 256 px en el bucket privado (SEGURIDAD.md §7)
+  isActive      Boolean   @default(true) // se da de baja, nunca se borra
+  hiredOn       DateTime? @db.Date
+  failedLogins  Int       @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime  @default(now())
+
+  refreshTokens  RefreshToken[]
+  advisorOrders  ServiceOrder[]    @relation("Advisor")
+  assignments    FolioAssignment[]
+  receptions     Reception[]
+  inspections    Inspection[]
+  payments       Payment[]
+  appointments   Appointment[]
+  reminders      InternalReminder[]
+  auditLogs      AuditLog[]
+
+  @@index([branchId, role])
+  @@map("users")
+}
+
+// Qué puede hacer cada rol. Lo edita Administración; el servidor lo aplica en cada endpoint.
+// La clave del permiso sale de packages/shared (p. ej. "finance.costs", "admin.flows").
+model RolePermission {
+  branchId   String  @db.Uuid
+  branch     Branch  @relation(fields: [branchId], references: [id])
+  role       Role
+  permission String
+  granted    Boolean
+
+  @@id([branchId, role, permission])
+  @@map("role_permissions")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+  familyId  String    @db.Uuid // reusar un token viejo invalida toda la familia
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, familyId])
+  @@map("refresh_tokens")
+}
+
+// ───────────────────────── Catálogo de vehículos (seed desde data/vehiculos) ─────────────────────────
+
+model VehicleMake {
+  id     String         @id @default(uuid()) @db.Uuid
+  name   String         @unique
+  models VehicleModel[]
+
+  @@map("vehicle_makes")
+}
+
+model VehicleModel {
+  id        String      @id @default(uuid()) @db.Uuid
+  makeId    String      @db.Uuid
+  make      VehicleMake @relation(fields: [makeId], references: [id])
+  name      String
+  yearFrom  Int
+  yearTo    Int? // null = sigue a la venta
+  bodyTypes BodyType[]
+  aliases   String[]
+  isCustom  Boolean     @default(false) // agregado por el taller
+
+  versions VehicleVersion[]
+  vehicles Vehicle[]
+
+  @@unique([makeId, name])
+  @@map("vehicle_models")
+}
+
+model VehicleVersion {
+  id                     String       @id @default(uuid()) @db.Uuid
+  modelId                String       @db.Uuid
+  model                  VehicleModel @relation(fields: [modelId], references: [id])
+  yearFrom               Int
+  yearTo                 Int?
+  trims                  String[]
+  engine                 String
+  cylinders              Int[]
+  fuel                   FuelType[]
+  transmissions          String[]
+  fuelEconomyKmlCombined Decimal      @db.Decimal(4, 1) // referencia CONUEE, no un dato garantizado
+
+  @@index([modelId, yearFrom])
+  @@map("vehicle_versions")
+}
+
+// ───────────────────────── Clientes y vehículos ─────────────────────────
+
+model Customer {
+  id           String    @id @default(uuid()) @db.Uuid
+  branchId     String    @db.Uuid
+  branch       Branch    @relation(fields: [branchId], references: [id])
+  name         String
+  phone        String // 10 dígitos
+  email        String? // para el recordatorio de servicio
+  anonymizedAt DateTime? // derechos ARCO: se anonimiza, no se borra
+  createdAt    DateTime  @default(now())
+
+  consents     Consent[]
+  vehicles     Vehicle[]
+  orders       ServiceOrder[]
+  folios       Folio[]
+  appointments Appointment[]
+
+  @@index([branchId, phone])
+  @@index([branchId, name]) // la búsqueda difusa usa un índice pg_trgm creado en SQL
+  @@map("customers")
+}
+
+model Consent {
+  id            String   @id @default(uuid()) @db.Uuid
+  customerId    String   @db.Uuid
+  customer      Customer @relation(fields: [customerId], references: [id])
+  channel       Channel
+  granted       Boolean
+  noticeVersion String // versión del aviso de privacidad entregado
+  recordedAt    DateTime @default(now())
+
+  @@index([customerId, channel])
+  @@map("consents")
+}
+
+model Vehicle {
+  id             String        @id @default(uuid()) @db.Uuid
+  branchId       String        @db.Uuid
+  branch         Branch        @relation(fields: [branchId], references: [id])
+  customerId     String        @db.Uuid
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  modelId        String?       @db.Uuid // referencia al catálogo…
+  model          VehicleModel? @relation(fields: [modelId], references: [id])
+  makeText       String // …y copia del texto: si el catálogo cambia, el historial no se altera
+  modelText      String
+  versionText    String?
+  engineText     String?
+  year           Int
+  bodyType       BodyType      @default(SEDAN) // decide qué diagrama de daños se muestra
+  plates         String // en mayúsculas
+  color          String?
+  vin            String? // 17 caracteres, sin I, O ni Q
+  reminderMonths Int? // si es nulo, usa BranchSetting.reminderMonths
+  createdAt      DateTime      @default(now())
+
+  folios       Folio[]
+  reminders    ServiceReminder[]
+  appointments Appointment[]
+
+  @@unique([id, customerId]) // destino de la llave compuesta desde Folio
+  @@index([branchId, plates])
+  @@index([vin])
+  @@map("vehicles")
+}
+
+// ───────────────────────── Orden (el servicio) y folio (cada carro) ─────────────────────────
+
+// Orden: el servicio completo de un cliente. Puede incluir varios carros (folios).
+// No tiene estatus propio: el avance ("2 de 3 carros listos") se calcula de sus folios.
+model ServiceOrder {
+  id          String   @id @default(uuid()) @db.Uuid
+  branchId    String   @db.Uuid
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  customerId  String   @db.Uuid
+  customer    Customer @relation(fields: [customerId], references: [id])
+  orderNumber Int // número de la hoja del Excel: se sugiere el consecutivo y PUEDE repetirse
+  serviceCode String   @unique // FS-26-000123: llave de negocio en búsquedas, PDF y portal
+  advisorId   String   @db.Uuid
+  advisor     User     @relation("Advisor", fields: [advisorId], references: [id])
+  createdAt   DateTime @default(now())
+  version     Int      @default(1) // control de concurrencia optimista
+
+  folios   Folio[]
+  payments Payment[]
+  tracking TrackingToken[] // un enlace vigente por orden
+
+  @@unique([id, customerId]) // destino de la llave compuesta desde Folio
+  @@index([branchId, orderNumber]) // buscar por número puede devolver más de una orden
+  @@index([customerId])
+  @@map("service_orders")
+}
+
+// Folio: cada carro dentro de la orden. Aquí viven el estatus, la recepción, el diagnóstico,
+// la cotización, los técnicos, la utilidad y las horas de mano de obra.
+model Folio {
+  id         String       @id @default(uuid()) @db.Uuid
+  branchId   String       @db.Uuid
+  branch     Branch       @relation(fields: [branchId], references: [id])
+  orderId    String       @db.Uuid
+  customerId String       @db.Uuid // se repite a propósito: garantiza que orden, carro y cliente coinciden
+  vehicleId  String       @db.Uuid
+  seq        Int // 1, 2, 3… dentro de la orden
+  folioCode  String       @unique // serviceCode + "-" + seq, p. ej. FS-26-000123-2
+  status     FolioStatus  @default(RECEIVED)
+
+  reportedFault String // con las palabras del cliente
+  mileageKm     Int?
+  waitingNote   String? // "Bomba de agua: Puebla la entrega el jueves 29"
+  cancelReason  String? // obligatorio al cancelar (también si rechazó toda la cotización)
+  receivedAt    DateTime  @default(now())
+  quotedAt      DateTime?
+  authorizedAt  DateTime?
+  finishedAt    DateTime?
+  deliveredAt   DateTime?
+  originalFolioId String?  @db.Uuid // garantía o retrabajo
+  version       Int       @default(1)
+
+  order    ServiceOrder @relation(fields: [orderId, customerId], references: [id, customerId])
+  vehicle  Vehicle      @relation(fields: [vehicleId, customerId], references: [id, customerId])
+  customer Customer     @relation(fields: [customerId], references: [id])
+  original Folio?       @relation("Warranty", fields: [originalFolioId], references: [id])
+  reworks  Folio[]      @relation("Warranty")
+
+  reception      Reception?
+  assignments    FolioAssignment[]
+  inspections    Inspection[]
+  lines          QuoteLine[]
+  authorizations Authorization[]
+  history        StatusHistory[]
+  appointments   Appointment[]
+
+  @@unique([orderId, seq])
+  @@index([branchId, status])
+  @@index([vehicleId]) // historial del carro
+  @@map("folios")
+}
+
+// Técnicos de un folio: varios por carro; cada técnico, una sola asignación activa (endedAt nulo).
+// Prisma no declara índices parciales; va en la migración SQL:
+//   CREATE UNIQUE INDEX one_active_folio_per_technician ON folio_assignments (technician_id) WHERE ended_at IS NULL;
+model FolioAssignment {
+  id           String    @id @default(uuid()) @db.Uuid
+  folioId      String    @db.Uuid
+  folio        Folio     @relation(fields: [folioId], references: [id])
+  technicianId String    @db.Uuid
+  technician   User      @relation(fields: [technicianId], references: [id])
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime? // se cierra si el carro espera refacción; al reasignar se abre otra
+  endReason    String?
+
+  @@index([folioId])
+  @@map("folio_assignments")
+}
+
+model StatusHistory {
+  id                String       @id @default(uuid()) @db.Uuid
+  folioId           String       @db.Uuid
+  folio             Folio        @relation(fields: [folioId], references: [id])
+  fromStatus        FolioStatus?
+  toStatus          FolioStatus
+  byUserId          String?      @db.Uuid // nulo si la autorización vino del portal
+  channel           AuthChannel?
+  reason            String?
+  secondsInPrevious Int?
+  at                DateTime     @default(now())
+
+  @@index([folioId, at])
+  @@map("status_history")
+}
+
+// ───────────────────────── Recepción y diagnóstico ─────────────────────────
+
+model Reception {
+  id           String    @id @default(uuid()) @db.Uuid
+  folioId      String    @unique @db.Uuid
+  folio        Folio     @relation(fields: [folioId], references: [id])
+  deliveredBy  String? // quien entrega el carro, si no es el cliente
+  fuel         FuelLevel
+  noOdometer   Boolean   @default(false) // "sin tablero"
+  damageZones  Json // [{ zona, tipo: RAYON|GOLPE|ESTRELLADO|FALTANTE, nota }] o [] con noDamage
+  noDamage     Boolean   @default(false) // confirmado "sin daños" (obligatorio si no hay zonas)
+  receivedById String    @db.Uuid // el técnico que recibe el carro y firma
+  receivedBy   User      @relation(fields: [receivedById], references: [id])
+  // Firma como trazos, no como imagen: puntos enteros con diferencias entre puntos, comprimidos (≈0.5–1 KB).
+  // Se dibuja a SVG o PNG al leerla. El hash (SHA-256 de trazos + folio + técnico + hora) detecta alteraciones.
+  signatureStrokes Bytes
+  signatureHash    String
+  signedAt         DateTime
+
+  checks ReceptionCheck[]
+
+  @@map("receptions")
+}
+
+model ReceptionCheck {
+  id          String     @id @default(uuid()) @db.Uuid
+  receptionId String     @db.Uuid
+  reception   Reception  @relation(fields: [receptionId], references: [id])
+  item        String // "Luces", "Llanta de refacción"…
+  state       CheckState @default(UNCHECKED)
+  note        String?
+
+  @@unique([receptionId, item])
+  @@map("reception_checks")
+}
+
+model InspectionTemplate {
+  id       String   @id @default(uuid()) @db.Uuid
+  branchId String   @db.Uuid
+  name     String // Frenos, Suspensión, Scanner…
+  items    String[]
+  isActive Boolean  @default(true)
+
+  inspections Inspection[]
+
+  @@map("inspection_templates")
+}
+
+model Inspection {
+  id           String             @id @default(uuid()) @db.Uuid
+  folioId      String             @db.Uuid
+  folio        Folio              @relation(fields: [folioId], references: [id])
+  templateId   String             @db.Uuid
+  template     InspectionTemplate @relation(fields: [templateId], references: [id])
+  technicianId String             @db.Uuid
+  technician   User               @relation(fields: [technicianId], references: [id])
+  createdAt    DateTime           @default(now())
+
+  results InspectionResult[]
+
+  @@index([folioId])
+  @@map("inspections")
+}
+
+model InspectionResult {
+  id           String     @id @default(uuid()) @db.Uuid
+  inspectionId String     @db.Uuid
+  inspection   Inspection @relation(fields: [inspectionId], references: [id])
+  item         String
+  state        CheckState @default(UNCHECKED)
+  note         String?
+
+  @@unique([inspectionId, item])
+  @@map("inspection_results")
+}
+
+// ───────────────────────── Cotización y servicios tabulados ─────────────────────────
+
+// Servicio tabulado: precio de referencia. Sin paquetes de precios.
+model ServiceCatalogItem {
+  id                  String   @id @default(uuid()) @db.Uuid
+  branchId            String   @db.Uuid
+  branch              Branch   @relation(fields: [branchId], references: [id])
+  name                String // "Afinación mayor 4 cil.", "Cambio de balatas delanteras"…
+  referencePriceCents Int
+  referenceHours      Decimal? @db.Decimal(5, 2) // horas tabuladoras, si el cliente confirma qué son (especificación §6)
+  isActive            Boolean  @default(true)
+
+  lines QuoteLine[]
+
+  @@unique([branchId, name])
+  @@map("service_catalog_items")
+}
+
+// Partidas del folio. SIN estatus propio: lo autorizado queda como trabajo autorizado (Authorization)
+// y lo rechazado se retira (removedAt) y queda en el historial.
+model QuoteLine {
+  id          String   @id @default(uuid()) @db.Uuid
+  folioId     String   @db.Uuid
+  folio       Folio    @relation(fields: [folioId], references: [id])
+  type        LineType
+  description String // en PART: texto libre + nº de parte, p. ej. "Bujía 19336070"
+  sortOrder   Int      @default(0)
+
+  // LABOR: precio real cobrado y, si salió del catálogo, la copia del precio tabulado de ese día
+  priceCents          Int     @default(0)
+  catalogItemId       String? @db.Uuid
+  catalogItem         ServiceCatalogItem? @relation(fields: [catalogItemId], references: [id])
+  tabulatedPriceCents Int?
+
+  // PART y SUBLET: el concepto de refacciones del Excel (costo, proveedor, factura, fecha)
+  costCents       Int       @default(0)
+  supplierId      String?   @db.Uuid
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  invoiceRef      String? // factura o remisión del proveedor
+  purchasedAt     DateTime? @db.Date // vacía = por comprar
+  supplierPaidAt  DateTime? @db.Date // vacía = pendiente de pago al proveedor
+  paidFromAccountId String? @db.Uuid
+  paidFromAccount CashAccount? @relation(fields: [paidFromAccountId], references: [id])
+
+  removedAt     DateTime? // rechazada o retirada: no se borra
+  removedReason String?
+
+  @@index([folioId, type])
+  @@index([supplierId])
+  @@map("quote_lines")
+}
+
+// Lo que el cliente aprobó: total y partidas de ese momento, y el canal.
+model Authorization {
+  id         String      @id @default(uuid()) @db.Uuid
+  folioId    String      @db.Uuid
+  folio      Folio       @relation(fields: [folioId], references: [id])
+  channel    AuthChannel
+  byUserId   String?     @db.Uuid
+  totalCents Int
+  lineIds    String[]    @db.Uuid
+  ip         String?
+  userAgent  String?
+  at         DateTime    @default(now())
+
+  @@index([folioId])
+  @@map("authorizations")
+}
+
+model Supplier {
+  id         String   @id @default(uuid()) @db.Uuid
+  branchId   String   @db.Uuid
+  branch     Branch   @relation(fields: [branchId], references: [id])
+  name       String // MORALES, PUEBLA, SAYM, Almacén propio…
+  kind       String? // Refacciones, Taller externo (TOT), Combustible…
+  phone      String?
+  contact    String?
+  isOwnStock Boolean  @default(false) // "Almacén propio": sin control de existencias ni pago
+  isActive   Boolean  @default(true)
+
+  lines    QuoteLine[]
+  expenses Expense[]
+
+  @@unique([branchId, name])
+  @@map("suppliers")
+}
+
+// ───────────────────────── Pagos ─────────────────────────
+
+// Los pagos son de la orden. Cada uno guarda la tasa, la comisión y su IVA del día en que se cobró,
+// así que un cambio de tarifa no altera pagos viejos.
+model Payment {
+  id          String        @id @default(uuid()) @db.Uuid
+  orderId     String        @db.Uuid
+  order       ServiceOrder  @relation(fields: [orderId], references: [id])
+  kind        PaymentKind
+  method      PaymentMethod
+  amountCents Int // siempre positivo; un reverso es otro pago con kind = REVERSAL
+  feeRateBp   Int           @default(0) // 290, 210 o 0
+  feeCents    Int           @default(0)
+  feeIvaCents Int           @default(0) // la comisión total (con IVA) es un gasto del taller
+  accountId   String        @db.Uuid // a qué cuenta entró (caja o banco)
+  account     CashAccount   @relation(fields: [accountId], references: [id])
+  reversesId  String?       @unique @db.Uuid
+  reverses    Payment?      @relation("Reversal", fields: [reversesId], references: [id])
+  reversedBy  Payment?      @relation("Reversal")
+  note        String?
+  paidAt      DateTime // fecha del cobro: también es la fecha de su comisión
+  byUserId    String        @db.Uuid
+  byUser      User          @relation(fields: [byUserId], references: [id])
+
+  @@index([orderId])
+  @@index([paidAt])
+  @@map("payments")
+}
+
+// ───────────────────────── Administración: cuentas, gastos y movimientos ─────────────────────────
+
+model CashAccount {
+  id                  String      @id @default(uuid()) @db.Uuid
+  branchId            String      @db.Uuid
+  branch              Branch      @relation(fields: [branchId], references: [id])
+  name                String // "Caja del taller", "BBVA Empresarial"
+  kind                AccountKind
+  openingBalanceCents Int
+  openedOn            DateTime    @db.Date // desde aquí se calculan los saldos
+  isActive            Boolean     @default(true)
+
+  payments  Payment[]
+  purchases QuoteLine[]
+  expenses  Expense[]
+  movements AccountMovement[]
+
+  @@unique([branchId, name])
+  @@map("cash_accounts")
+}
+
+// Gasto del taller que no pertenece a una orden (renta, nómina, luz…). Se edita; no se borra: se anula.
+model Expense {
+  id            String      @id @default(uuid()) @db.Uuid
+  branchId      String      @db.Uuid
+  branch        Branch      @relation(fields: [branchId], references: [id])
+  category      String // catálogo en configuración; pendiente de confirmar con el cliente
+  concept       String
+  amountCents   Int
+  spentOn       DateTime    @db.Date
+  accountId     String      @db.Uuid
+  account       CashAccount @relation(fields: [accountId], references: [id])
+  supplierId    String?     @db.Uuid
+  supplier      Supplier?   @relation(fields: [supplierId], references: [id])
+  payee         String? // beneficiario libre si no es proveedor
+  removedAt     DateTime?
+  removedReason String?
+  createdAt     DateTime    @default(now())
+
+  @@index([branchId, spentOn])
+  @@map("expenses")
+}
+
+// Ingreso o egreso capturado a mano. Un traspaso son dos movimientos con el mismo transferGroupId
+// (egreso en el origen, ingreso en el destino) y no cuenta como ingreso ni egreso del taller.
+model AccountMovement {
+  id              String       @id @default(uuid()) @db.Uuid
+  branchId        String       @db.Uuid
+  branch          Branch       @relation(fields: [branchId], references: [id])
+  accountId       String       @db.Uuid
+  account         CashAccount  @relation(fields: [accountId], references: [id])
+  kind            MovementKind
+  amountCents     Int
+  concept         String
+  movedOn         DateTime     @db.Date
+  transferGroupId String?      @db.Uuid
+  removedAt       DateTime?
+  removedReason   String?
+  createdAt       DateTime     @default(now())
+
+  @@index([branchId, movedOn])
+  @@index([transferGroupId])
+  @@map("account_movements")
+}
+
+// ───────────────────────── Citas y avisos ─────────────────────────
+
+model Appointment {
+  id          String            @id @default(uuid()) @db.Uuid
+  branchId    String            @db.Uuid
+  branch      Branch            @relation(fields: [branchId], references: [id])
+  customerId  String?           @db.Uuid // nulo si el cliente es nuevo y aún no se registra
+  customer    Customer?         @relation(fields: [customerId], references: [id])
+  contactName String // se guarda aunque no exista el cliente
+  phone       String?
+  vehicleId   String?           @db.Uuid
+  vehicle     Vehicle?          @relation(fields: [vehicleId], references: [id])
+  vehicleText String // "Mazda 3 2017 · PKF-930-A"
+  folioId     String?           @db.Uuid // obligatorio cuando reason = DELIVERY (CHECK en SQL)
+  folio       Folio?            @relation(fields: [folioId], references: [id])
+  reason      AppointmentReason
+  status      AppointmentStatus @default(PENDING)
+  startsAt    DateTime
+  durationMin Int               @default(60)
+  advisorId   String            @db.Uuid
+  advisor     User              @relation(fields: [advisorId], references: [id])
+  notes       String?
+  createdAt   DateTime          @default(now())
+
+  reminders InternalReminder[]
+
+  @@index([branchId, startsAt])
+  @@index([folioId])
+  @@map("appointments")
+}
+
+// Recordatorio interno para el asesor (p. ej. "llamar para confirmar la cita"). No es un mensaje al cliente.
+model InternalReminder {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @db.Uuid
+  user          User         @relation(fields: [userId], references: [id])
+  appointmentId String?      @db.Uuid
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  text          String
+  dueAt         DateTime
+  doneAt        DateTime?
+
+  @@index([userId, dueAt])
+  @@map("internal_reminders")
+}
+
+// Recordatorio de servicio por correo (en espera: requiere proveedor de correo).
+// La llave única evita mandar dos veces el mismo aviso si el trabajo diario se repite.
+model ServiceReminder {
+  id        String    @id @default(uuid()) @db.Uuid
+  vehicleId String    @db.Uuid
+  vehicle   Vehicle   @relation(fields: [vehicleId], references: [id])
+  dueOn     DateTime  @db.Date // última entrega + intervalo
+  status    String // QUEUED, SENT, FAILED, OPTED_OUT
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([vehicleId, dueOn])
+  @@map("service_reminders")
+}
+
+// ───────────────────────── Portal del cliente ─────────────────────────
+
+model TrackingToken {
+  id           String       @id @default(uuid()) @db.Uuid
+  orderId      String       @db.Uuid
+  order        ServiceOrder @relation(fields: [orderId], references: [id])
+  tokenHash    String       @unique // SHA-256; el token (≥128 bits) solo se muestra al crearlo
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  lastViewedAt DateTime?
+  createdAt    DateTime     @default(now())
+
+  otps OtpChallenge[]
+
+  @@index([orderId])
+  @@map("tracking_tokens")
+}
+
+model OtpChallenge {
+  id        String        @id @default(uuid()) @db.Uuid
+  tokenId   String        @db.Uuid
+  token     TrackingToken @relation(fields: [tokenId], references: [id])
+  purpose   OtpPurpose
+  codeHash  String
+  attempts  Int           @default(0) // máximo 5
+  expiresAt DateTime // 5 minutos
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([tokenId, createdAt])
+  @@map("otp_challenges")
+}
+
+// ───────────────────────── Bitácoras ─────────────────────────
+
+model Notification {
+  id         String    @id @default(uuid()) @db.Uuid
+  branchId   String    @db.Uuid
+  customerId String    @db.Uuid
+  orderId    String?   @db.Uuid
+  channel    Channel
+  template   String
+  status     String // QUEUED, SENT, FAILED
+  sentAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([orderId])
+  @@map("notifications")
+}
+
+// Solo inserción: el usuario de la app no tiene UPDATE ni DELETE (SEGURIDAD.md §10)
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  branchId  String?  @db.Uuid
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String // PRICE_CHANGED, STATUS_CHANGED, PAYMENT_REVERSED, EXPENSE_EDITED, PERMISSION_CHANGED…
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  reason    String? // obligatorio en acciones críticas
+  ip        String?
+  userAgent String?
+  at        DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([at])
+  @@map("audit_log")
+}
