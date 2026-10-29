@@ -1,0 +1,5 @@
+# La imagen del prototipo solo necesita la configuración de Caddy y los archivos del prototipo.
+# Todo lo demás (datos de clientes, documentación, grafo, artefactos) queda fuera del contexto de build.
+*
+!docker/Caddyfile
+!prototipo/

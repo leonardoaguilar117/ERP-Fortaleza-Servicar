@@ -1,0 +1,30 @@
+# Prototipo de Fortaleza Servicar: archivos estáticos, sin backend.
+# El certificado HTTPS lo pone el proveedor (Render o Railway); dentro del contenedor se sirve HTTP.
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	respond /healthz "ok" 200
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		X-Robots-Tag "noindex, nofollow"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# Es una versión de prueba que cambia seguido: el navegador siempre revisa si hay una versión nueva.
+	header /js/* Cache-Control "no-cache"
+	header /css/* Cache-Control "no-cache"
+	header *.html Cache-Control "no-cache"
+	header / Cache-Control "no-cache"
+
+	file_server
+}
