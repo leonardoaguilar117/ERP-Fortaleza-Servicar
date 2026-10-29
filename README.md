@@ -72,6 +72,22 @@ python -m http.server 8765 --bind 127.0.0.1
 | http://127.0.0.1:8765/index.html | El ERP del personal |
 | http://127.0.0.1:8765/portal.html#k7Qw2mZ9pL4xT8vR | El portal del cliente; el código para autorizar es `482913` |
 
+### Con Docker (versión de prueba)
+
+```bash
+git clone https://github.com/leonardoaguilar117/ERP-Fortaleza-Servicar.git
+cd ERP-Fortaleza-Servicar
+docker compose up --build -d
+```
+
+Abre http://localhost:8080 para el ERP, o http://localhost:8080/portal.html#k7Qw2mZ9pL4xT8vR para el portal. Para detenerlo, `docker compose down`.
+
+- La imagen (`docker/prototipo.Dockerfile`) sirve el prototipo con Caddy, sin privilegios de root, con cabeceras de seguridad y la ruta de salud `/healthz`.
+- Escucha en `$PORT` (8080 por defecto), así que también se puede publicar como *Web Service* de Docker en Render o Railway.
+- Sin Docker Compose: `docker build -f docker/prototipo.Dockerfile -t fortaleza-prototipo .` y luego `docker run --rm -p 8080:8080 fortaleza-prototipo`.
+
+### En el navegador
+
 - Usa **"Ver como"**, en la barra lateral, para cambiar entre Administración, Asesor y Técnico y ver cómo cambian los permisos.
 - Prueba los temas Rojo, Oscuro y Claro, y la campana de notificaciones.
 - Todo corre en el navegador. Los datos son ficticios; las 4 órdenes del Excel conservan sus montos para validar las fórmulas.
@@ -108,6 +124,8 @@ El razonamiento de cada decisión y los costos de hosting están en la [especifi
 │   ├── portal.html       portal del cliente
 │   ├── css/              estilos y tokens de marca
 │   └── js/               pantallas, datos de muestra, gráficas y diagrama de daños
+├── docker/               imagen y configuración de Caddy para la versión de prueba del prototipo
+├── docker-compose.yml    levanta el prototipo en http://localhost:8080
 ├── data/vehiculos/       catálogo de 416 modelos del mercado mexicano (255 con versión, motor y km/l)
 ├── color/ · img/         paleta oficial, layout de referencia y piezas de marca
 ├── SEGURIDAD.md · CLAUDE.md · PROGRESO.md

@@ -155,7 +155,9 @@ El objetivo es **una sola imagen de backend** y sitios estáticos para el ERP y 
   - Checklists que arranquen ya marcados como "Bien".
   - Gráficas sin estado vacío.
 
-## Comandos (se definirán en la fase 1)
+## Comandos
+
+Hoy existe uno: `docker compose up --build -d`, que levanta la versión de prueba del prototipo en http://localhost:8080 (`docker/prototipo.Dockerfile`). Estos son los planeados para la fase 1:
 
 ```bash
 pnpm install

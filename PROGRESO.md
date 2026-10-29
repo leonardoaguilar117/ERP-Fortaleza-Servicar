@@ -37,7 +37,17 @@
 
 ## 3. Prototipo: cómo correrlo y probarlo
 
-- **Servir:** `cd prototipo && python -m http.server 8765 --bind 127.0.0.1`, y abrir `http://127.0.0.1:8765/index.html`.
+- **Repositorio:** https://github.com/leonardoaguilar117/ERP-Fortaleza-Servicar (público).
+  - Primera carga: 25 commits el 2026-10-29.
+  - Sin datos reales: `.gitignore` deja fuera el Excel, las capturas de MecanicaMX, `graphify-out/`, `.taste-skill/` y `.claude/`.
+  - Las 4 órdenes del Excel en `js/datos.js` tienen cliente, teléfono, placas y VIN ficticios.
+  - **Nunca subas datos reales de clientes.**
+  - La especificación vive en `docs/especificacion.md`; `README.md` es la presentación del repositorio.
+- **Docker (versión de prueba):** `docker compose up --build -d` → http://localhost:8080.
+  - Caddy sin root, salud en `/healthz`, puerto en `$PORT`.
+  - Archivos: `docker/prototipo.Dockerfile`, `docker/Caddyfile` y `docker-compose.yml`.
+  - **Pendiente:** probar el build; en esta máquina no hay Docker.
+- **Servir sin Docker:** `cd prototipo && python -m http.server 8765 --bind 127.0.0.1`, y abrir `http://127.0.0.1:8765/index.html`.
 - **Portal de prueba:**
   - `portal.html#k7Qw2mZ9pL4xT8vR`, código `482913`.
   - Otros estatus: `#QaZN4gbzMO4TXqmL` (por autorizar), `#M0Z9imt1uwMPPyuP` (diagnóstico), `#YUDhukplQmyTnuqn` (reparación), `#Tw6N5SENFQlNcOF1` (esperando refacción), `#BAmvVKMpZohrqO1Z` (listo) y `#dUYLLu0vZABVUg7x` (entregado).
