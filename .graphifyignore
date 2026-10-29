@@ -1,0 +1,6 @@
+# Artefactos de herramientas: no son conocimiento del proyecto
+.taste-skill/
+.claude/
+# Generados o de terceros: su fuente ya está en el grafo
+prototipo/js/vehiculos.js
+prototipo/css/base.css
