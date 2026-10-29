@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fortaleza Servicar · Taller</title>
+  <meta name="robots" content="noindex">
+  <script>try { var t = localStorage.getItem('fs-tema'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;450;500;550;600;650&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/fortaleza.css">
+  <link rel="stylesheet" href="css/fase3.css">
+  <link rel="stylesheet" href="css/fase4.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" id="sidebar" aria-label="Principal">
+      <div class="brand">
+        <svg viewBox="0 0 26 30" aria-hidden="true"><path d="M13 1 24.5 5v9.2c0 7-4.9 12.6-11.5 14.8C6.4 26.8 1.5 21.2 1.5 14.2V5Z" fill="#9C2327"/><path d="M9 8.5h8.6v2.8h-5.6v2.6h4.8v2.8h-4.8v5.8H9Z" fill="#fff"/></svg>
+        <div><b>Fortaleza Servicar</b><span>Servicio automotriz · Matriz</span></div>
+        <button class="icon close" type="button" aria-label="Cerrar menú" data-close-menu style="margin-left:auto;width:44px;height:44px;place-items:center;border:0;background:none;color:inherit">
+          <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 5 10 10M15 5 5 15"/></svg>
+        </button>
+      </div>
+
+      <div class="user-card">
+        <button class="av" id="av" type="button" aria-label="Agregar mi foto de perfil" title="Cambiar foto">A</button>
+        <b id="who-name">Administración</b>
+        <small id="who-sub">Taller principal · en línea</small>
+        <select id="role" aria-label="Ver como">
+          <option value="admin">Ver como: Administración (dueño)</option>
+          <option value="asesor">Ver como: Pablo · Asesor</option>
+          <option value="tecnico">Ver como: Daniel · Técnico</option>
+        </select>
+      </div>
+
+      <div class="nav-group" data-g="principal">
+        <div class="group-label">Principal</div>
+      <a class="nav-item" href="#/dashboard" data-route="dashboard">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Dashboard</a>
+      </div>
+
+      <div class="nav-group" data-g="taller">
+        <div class="group-label">Taller</div>
+      <a class="nav-item" href="#/ordenes" data-route="ordenes">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><rect x="3" y="2.5" width="10" height="11.5" rx="1.5"/><path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/></svg>Órdenes de servicio<span class="count" id="nav-count" title="Servicios por autorizar"></span></a>
+      <a class="nav-item" href="#/recepcion" data-route="recepcion" data-need="recepcion">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 10.5V8.2l1.6-3.4A1.5 1.5 0 0 1 5 4h6a1.5 1.5 0 0 1 1.4.8L14 8.2v2.3a1 1 0 0 1-1 1h-.5M3.5 11.5H3a1 1 0 0 1-1-1"/><circle cx="5" cy="11.5" r="1.5"/><circle cx="11" cy="11.5" r="1.5"/><path d="M6.5 11.5h3"/></svg>Recepción de vehículo</a>
+      <a class="nav-item" href="portal.html#k7Qw2mZ9pL4xT8vR" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><rect x="4.5" y="1.5" width="7" height="13" rx="1.5"/><path d="M7 12.5h2"/></svg>Portal del cliente</a>
+      </div>
+
+      <div class="nav-group" data-g="gestion">
+        <div class="group-label">Gestión</div>
+      <a class="nav-item" href="#/citas" data-route="citas" data-need="citas">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><rect x="2" y="3.5" width="12" height="10.5" rx="1.5"/><path d="M2 7h12M5.5 2v3M10.5 2v3"/></svg>Citas y recordatorios<span class="count" id="nav-citas" title="Citas por confirmar"></span></a>
+      <a class="nav-item" href="#/reportes" data-route="reportes" data-need="reportes">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 13.5h12M4 11V7.5M8 11V3.5M12 11V6"/></svg>Reportes</a>
+      </div>
+
+      <div class="nav-group" data-g="admin">
+        <div class="group-label">Administración</div>
+      <a class="nav-item" href="#/balance" data-route="balance" data-need="flujos">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M8 2v12M3 5h10M3 5l-1.5 4a2 2 0 0 0 3 0zM13 5l-1.5 4a2 2 0 0 0 3 0zM5.5 14h5"/></svg>Balance</a>
+      <a class="nav-item" href="#/bancos" data-route="bancos" data-need="flujos">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 6 8 2.5 14 6M3.5 6.5v5M6.5 6.5v5M9.5 6.5v5M12.5 6.5v5M2 13.5h12"/></svg>Bancos y flujos</a>
+      <a class="nav-item" href="#/compras" data-route="compras" data-need="gastos">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 2.5h1.8l1.6 8h7.1l1.5-5.5H4.6"/><circle cx="6" cy="13" r="1"/><circle cx="11.5" cy="13" r="1"/></svg>Gastos y compras</a>
+      <a class="nav-item" href="#/empleados" data-route="empleados" data-need="empleados">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11.5 6.5v4M9.5 8.5h4"/></svg>Empleados y roles</a>
+      </div>
+
+      <div class="nav-group" data-g="pronto">
+        <div class="group-label">Próximamente</div>
+      <span class="nav-item" aria-disabled="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11 3.5a2.2 2.2 0 0 1 0 4.2M12.5 10.2c1 .5 1.7 1.6 2 3.3"/></svg>Clientes<span class="phase">Pronto</span></span>
+      </div>
+
+      <p class="demo-tag">Demo · datos de muestra</p>
+      <div class="themes bottom">
+        <span id="tema-lbl">Estilo de color</span>
+        <div role="group" aria-labelledby="tema-lbl">
+          <button type="button" data-tema="deportivo" aria-pressed="true"><i style="--c:#9c2327"></i>Rojo</button>
+          <button type="button" data-tema="oscuro" aria-pressed="false"><i style="--c:#f26b6f"></i>Oscuro</button>
+          <button type="button" data-tema="clasico" aria-pressed="false"><i style="--c:#c0392b"></i>Claro</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="search" role="search">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+          <input id="q" type="search" placeholder="Buscar por placas, cliente u orden" aria-label="Buscar por placas, cliente u orden" autocomplete="off">
+          <kbd>/</kbd>
+          <div class="search-results" id="results" role="listbox" aria-label="Resultados"></div>
+        </div>
+        <div class="right">
+          <button class="icon-btn bell" type="button" data-bell aria-haspopup="true" aria-expanded="false" aria-controls="notif" aria-label="Notificaciones">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3zM6.5 14h3"/></svg><span class="badge" hidden></span></button>
+          <span class="live">Taller activo</span><span id="clock"></span>
+          <a class="btn primary" href="#/recepcion" data-need="recepcion">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Nueva recepción</a>
+        </div>
+      </header>
+      <div class="mobile-bar">
+        <button class="icon" type="button" aria-label="Abrir menú" data-open-menu>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+        </button>
+        <span class="title" id="mobile-title">Dashboard</span>
+        <button class="icon bell" type="button" data-bell aria-haspopup="true" aria-expanded="false" aria-controls="notif" aria-label="Notificaciones">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3zM6.5 14h3"/></svg><span class="badge" hidden></span></button>
+        <a class="icon" href="#/recepcion" aria-label="Nueva recepción" data-need="recepcion">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12"/></svg>
+        </a>
+      </div>
+      <main class="sheet" id="view" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/graficas.js"></script>
+  <script src="js/vehiculos.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/diagrama.js"></script>
+  <script src="js/datos3.js"></script>
+  <script src="js/datos4.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/fase3.js"></script>
+  <script src="js/fase4.js"></script>
+</body>
+</html>
