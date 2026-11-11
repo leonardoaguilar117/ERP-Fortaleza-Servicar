@@ -112,6 +112,9 @@ El razonamiento de cada decisión y los costos de hosting están en la [especifi
 | [`docs/especificacion.md`](docs/especificacion.md) | Alcance, **reglas de negocio** (única fuente), arquitectura, hosting, hoja de ruta y preguntas abiertas |
 | [`docs/schema.prisma`](docs/schema.prisma) | Esquema de la base de datos (pasa `prisma validate`) |
 | [`docs/modelo-de-datos.md`](docs/modelo-de-datos.md) | Cómo cada regla queda en las tablas y qué restricciones van en SQL |
+| [`docs/documentacion-tecnica.md`](docs/documentacion-tecnica.md) | Cómo está construido el prototipo: módulos, flujo de la orden, guardado, seguridad y emblema 3D, con diagramas |
+| [`docs/guia-cliente.md`](docs/guia-cliente.md) | Guía para el taller: cómo funciona la plataforma, paso a paso y sin tecnicismos |
+| [`docs/diagrama-logica-negocio.html`](docs/diagrama-logica-negocio.html) | Diagrama de las reglas de negocio |
 | [`SEGURIDAD.md`](SEGURIDAD.md) | Requisitos de seguridad y privacidad (LFPDPPP), obligatorios desde la fase 1 |
 | [`CLAUDE.md`](CLAUDE.md) | Reglas para desarrollar en el repositorio |
 | [`PROGRESO.md`](PROGRESO.md) | Estado del trabajo y siguiente paso |
@@ -124,7 +127,8 @@ El razonamiento de cada decisión y los costos de hosting están en la [especifi
 │   ├── index.html        ERP del personal
 │   ├── portal.html       portal del cliente
 │   ├── css/              estilos y tokens de marca
-│   └── js/               pantallas, datos de muestra, gráficas y diagrama de daños
+│   ├── js/               pantallas, datos de muestra, máquina de estados, guardado en el navegador y emblema 3D
+│   └── vendor/three/     three.js r186 (MIT), solo para el emblema del portal
 ├── docker/               imagen y configuración de Caddy para la versión de prueba del prototipo
 ├── docker-compose.yml    levanta el prototipo en http://localhost:8080
 ├── render.yaml           Blueprint de Render para publicar el prototipo

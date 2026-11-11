@@ -136,7 +136,7 @@ Las cuatro órdenes de tu Excel de ejemplo (2752, 2824, 2825 y 2826) están carg
 - **Bancos y flujos**: el saldo de la caja y del banco, con cada entrada y salida. Los cobros llegan solos desde las órdenes. Aquí también anotas depósitos, retiros y traspasos entre cuentas.
 - **Gastos y compras**: la renta, la luz, la nómina y las compras a proveedores, con lo que está por comprar, pendiente de pago o pagado.
 - **Balance**: cuánto entró, cuánto salió y cuál fue el resultado del periodo que elijas (hoy, 7 días, el mes o las fechas que quieras).
-- **Reportes**: rentabilidad por orden, por técnico y por tipo de trabajo, con exportación a Excel.
+- **Reportes**: rentabilidad por orden y por técnico, compras por proveedor, gastos por categoría y cómo se forma el resultado del mes.
 
 ## 5. Lo que ve tu cliente
 

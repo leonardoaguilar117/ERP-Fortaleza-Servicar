@@ -22,7 +22,7 @@
 
 **2026-11-11:** el flujo de la orden ya se opera de punta a punta en el prototipo (cotización con tabulados, pagos MercadoPago/BBVA con IVA de la comisión, reversos, técnico, espera de refacción), con guardado en el navegador y sincronía ERP ↔ portal (`js/almacen.js`), bitácora (`#/bitacora`), CSP estricta en `docker/Caddyfile` y emblema 3D en el portal (`js/escena3d.js`, three.js r186 en `prototipo/vendor/three/`). Detalle en `docs/documentacion-tecnica.md`; versión para el taller en `docs/guia-cliente.md`.
 
-**Pendiente de esa sesión (se cortó por límite de uso):** confirmar que Render desplegó bien (el `Caddyfile` no se pudo validar en local); revisar `docs/guia-cliente.md` contra las pantallas; actualizar `README.md` (tabla de documentación y estructura); decidir qué hacer con `color/` e `img/`, que están borradas en disco pero no en git; correr `graphify update .`.
+**Pendiente de esa sesión (se cortó por límite de uso):** confirmar que Render desplegó bien (el `Caddyfile` no se pudo validar en local); decidir qué hacer con `color/` e `img/`, que están borradas en disco pero no en git; correr `graphify update .`.
 
 ## 2. Siguiente paso exacto (retomar aquí)
 
