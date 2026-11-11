@@ -16,7 +16,15 @@
 		X-Frame-Options DENY
 		Referrer-Policy no-referrer
 		X-Robots-Tag "noindex, nofollow"
-		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		# El proveedor termina HTTPS; el navegador recuerda un año que este sitio solo se abre por HTTPS.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Cross-Origin-Opener-Policy same-origin
+		Cross-Origin-Resource-Policy same-origin
+		# Política de contenido (SEGURIDAD.md §4): todo el código sale de este mismo sitio y no hay scripts en línea
+		# ni eval. Las únicas excepciones son las hojas y tipografías de Google Fonts y los atributos style que
+		# escribe el prototipo. Las fotos de perfil se previsualizan como data: o blob:.
+		Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
 		-Server
 	}
 

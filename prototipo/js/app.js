@@ -40,7 +40,11 @@
   const fechaHora = (iso) => `${fecha(iso)}, ${new Date(iso).toTimeString().slice(0, 5)}`;
   const horasDesde = (iso) => Math.floor((AHORA - new Date(iso)) / HORA);
   const diasCal = (a, b) => Math.round((new Date(b.slice(0, 10)) - new Date(a.slice(0, 10))) / DIA);
-  const telMask = (t) => (t ? `${t.slice(0, 2)} •••• ${t.slice(-4)}` : '—');
+  // Solo dígitos: el teléfono llega de un formulario y de lo guardado en el navegador, y se pinta dentro de HTML.
+  const telMask = (t) => {
+    const d = String(t || '').replace(/\D/g, '');
+    return d ? `${d.slice(0, 2)} •••• ${d.slice(-4)}` : '—';
+  };
   const dash = '<span class="dash">—</span>';
   const VIN_VALIDO = /^[A-HJ-NPR-Z0-9]{17}$/; // 17 caracteres, sin I, O ni Q
 
@@ -207,7 +211,7 @@
   // Por WhatsApp solo viaja el enlace de seguimiento; todo lo demás (cotización, autorización, estatus) vive en el portal.
   const enlaceSeguimiento = (sv) => `https://seguimiento.fortalezaservicar.mx/s/${sv.tracking || 'k7Qw2mZ9pL4xT8vR'}`;
   const waUrl = (sv) =>
-    `https://wa.me/${sv.cliente.telefono ? `52${sv.cliente.telefono}` : ''}?text=${encodeURIComponent(enlaceSeguimiento(sv))}`;
+    `https://wa.me/${sv.cliente.telefono ? `52${String(sv.cliente.telefono).replace(/\D/g, '')}` : ''}?text=${encodeURIComponent(enlaceSeguimiento(sv))}`;
 
   // Cuenta de 0 al valor final en los elementos con data-count (formato en data-fmt).
   const FMT = { money, int, dec1: (v) => dec(v) };
@@ -463,7 +467,10 @@
 
   const persona = (id) => {
     if (!id) return dash;
-    const per = PERSONAL[id];
+    // Un técnico dado de alta en la demostración vive en `empleados`; PERSONAL solo trae al personal de muestra.
+    const emp = (window.FS.empleados || []).find((e) => e.id === id);
+    const per = PERSONAL[id] || (emp && { nombre: emp.nombre, tono: 200 });
+    if (!per) return dash;
     return `<span class="who">${avatar(id, per.nombre[0], per.tono)}${esc(per.nombre)}</span>`;
   };
   const MARCA_CORTA = { Volkswagen: 'VW', 'Mercedes-Benz': 'Mercedes' };

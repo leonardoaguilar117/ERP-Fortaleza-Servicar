@@ -61,6 +61,8 @@
     esTexto(s.cliente.nombre) &&
     s.vehiculo &&
     esTexto(s.vehiculo.marca) &&
+    (s.tracking === undefined || /^[A-Za-z0-9]{16,64}$/.test(s.tracking)) &&
+    (s.tecnico == null || /^[\w-]{1,48}$/.test(s.tecnico)) &&
     [s.trabajos, s.refacciones, s.tot, s.pagos].every(esLista) &&
     [...s.trabajos, ...s.refacciones, ...s.tot].every((r) => esLista(r) && Number.isFinite(+r[1])) &&
     s.pagos.every((r) => esLista(r) && Number.isFinite(+r[2]) && Number.isFinite(+r[3]));
@@ -70,6 +72,9 @@
       const d = JSON.parse(localStorage.getItem(LLAVE) || 'null');
       if (!d || d.v !== VERSION || !esLista(d.servicios) || !d.servicios.every(servicioValido)) return null;
       if (COLECCIONES.some((k) => d[k] !== undefined && !esLista(d[k]))) return null;
+      // Los identificadores se usan en atributos y enlaces: solo letras, números, guion y guion bajo.
+      const idValido = (x) => x && typeof x === 'object' && (x.id === undefined || /^[\w-]{1,48}$/.test(String(x.id)));
+      if (COLECCIONES.some((k) => k !== 'servicios' && k !== 'auditoria' && d[k] && !d[k].every(idValido))) return null;
       return d;
     } catch {
       return null;
@@ -87,7 +92,7 @@
   function restaurar(d) {
     rellenar(
       F.servicios,
-      d.servicios.map((s) => ({ ...s, calc: F.calcular(s) })),
+      d.servicios.map((s) => ({ ...s, orden: +s.orden, calc: F.calcular(s) })),
     );
     COLECCIONES.forEach((k) => {
       if (k === 'servicios' || !esLista(F[k]) || !esLista(d[k])) return;
@@ -99,6 +104,15 @@
       delete c.pos;
     });
     if (Number.isFinite(+d.siguienteOrden)) F.CONFIG.siguienteOrden = +d.siguienteOrden;
+    // Las pantallas buscan a cada persona en PERSONAL: se agregan los empleados dados de alta en la demostración y
+    // se suelta la asignación a alguien que ya no existe, para que ninguna orden apunte a un desconocido.
+    (F.empleados || []).forEach((e) => {
+      if (!F.PERSONAL[e.id]) F.PERSONAL[e.id] = { nombre: String(e.nombre || ''), rol: String(e.rol || ''), tono: 200 };
+    });
+    F.servicios.forEach((s) => {
+      if (s.tecnico && !F.PERSONAL[s.tecnico]) s.tecnico = null;
+      if (!F.PERSONAL[s.asesor]) s.asesor = 'pablo';
+    });
   }
 
   // ---------------------------------------------------------------------------------------------------------------
