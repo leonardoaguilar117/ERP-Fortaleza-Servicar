@@ -2,7 +2,7 @@
 
 > **Una sesión nueva lee este archivo primero.** Dice en qué se quedó el trabajo y cuál es el siguiente paso exacto. Al terminar cada tarea, actualízalo. Las decisiones de negocio **no** van aquí: viven en `docs/especificacion.md` §3.
 
-**Última actualización:** 2026-10-29.
+**Última actualización:** 2026-11-11.
 **Estado:** fase 0. Documentación consolidada (una sola fuente por tema), esquema de datos reescrito y validado, y prototipo navegable con todas las pantallas.
 
 ## 1. Hecho
@@ -15,9 +15,14 @@
 | Seguridad | `SEGURIDAD.md` | ✅ Alineado: sin facturación ni fotos de vehículo, permisos editables, firma en trazos |
 | Reglas de desarrollo | `CLAUDE.md` | ✅ |
 | Catálogo de vehículos (416 modelos, 255 con versiones) | `data/vehiculos/` | ✅ |
-| Prototipo sin backend | `prototipo/` | ✅ Pantallas y rutas en especificación §7.2 |
+| Prototipo sin backend | `prototipo/` | ✅ Pantallas y rutas en especificación §7.2. 2026-10-30: formateado con Prettier (ancho 120, comillas simples), comentado por secciones, máquina de estados en `js/estados.js`, registro de rutas con permiso y acciones del detalle como tabla de comandos |
+| Diagrama de la lógica de negocio | `docs/diagrama-logica-negocio.html` | ✅ Ilustra §3; lo genera un script fuera del repo (SVG con coordenadas calculadas) |
 
 **Respaldo** de la documentación anterior a la consolidación: `../Fortaleza Servicar - respaldo docs 2026-10-29/`, fuera del proyecto. Incluye el informe `decisiones-arquitectura.md`, ya integrado en especificación §4, y `prototipo/js/charts.js`, que ya no se usaba.
+
+**2026-11-11:** el flujo de la orden ya se opera de punta a punta en el prototipo (cotización con tabulados, pagos MercadoPago/BBVA con IVA de la comisión, reversos, técnico, espera de refacción), con guardado en el navegador y sincronía ERP ↔ portal (`js/almacen.js`), bitácora (`#/bitacora`), CSP estricta en `docker/Caddyfile` y emblema 3D en el portal (`js/escena3d.js`, three.js r186 en `prototipo/vendor/three/`). Detalle en `docs/documentacion-tecnica.md`; versión para el taller en `docs/guia-cliente.md`.
+
+**Pendiente de esa sesión (se cortó por límite de uso):** confirmar que Render desplegó bien (el `Caddyfile` no se pudo validar en local); revisar `docs/guia-cliente.md` contra las pantallas; actualizar `README.md` (tabla de documentación y estructura); decidir qué hacer con `color/` e `img/`, que están borradas en disco pero no en git; correr `graphify update .`.
 
 ## 2. Siguiente paso exacto (retomar aquí)
 
@@ -58,7 +63,8 @@
   - `js/datos.js`: las 4 órdenes del Excel, con `console.assert` de sus utilidades.
   - `js/datos3.js`: compras, gastos y citas.
   - `js/datos4.js`: cuentas, movimientos, empleados y permisos.
-  - `js/app.js`: router, dashboard, órdenes, detalle, recepción y notificaciones.
+  - `js/estados.js`: máquina de estados (catálogo de estatus, transiciones, `avanzar`, `autorizar`, `entregar`). Único lugar donde cambia un estatus; lo usan el ERP y el portal.
+  - `js/app.js`: núcleo, dashboard, órdenes, detalle, recepción, notificaciones y router. Las pantallas se registran con `FSApp.registrarRuta(nombre, render, { permiso, titulo })` y el router valida el permiso.
   - `js/fase3.js`: citas, gastos y compras, y reportes.
   - `js/fase4.js`: balance, bancos y empleados.
   - `css/fase4.css`: secciones del menú, colores del dinero (`.v-pos`, `.v-neg`, `--eg-*`) y Administración.
