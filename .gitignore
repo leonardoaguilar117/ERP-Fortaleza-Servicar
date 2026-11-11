@@ -25,3 +25,7 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Contrato: datos personales y bancarios, no se publica
+docs/Contrato_*.docx
+~$*
