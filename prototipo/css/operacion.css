@@ -122,9 +122,59 @@ td.acc {
   outline-offset: 2px;
 }
 
+/* ---------- acciones del encabezado de la orden ---------- */
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.panel > header .btn {
+  margin-left: auto;
+}
+
+/* ---------- lo recién capturado se ilumina un instante ---------- */
+@keyframes recien {
+  from {
+    background-color: var(--accent-soft);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+.recien,
+tr:has(> .recien) > td {
+  animation: recien 1100ms var(--ease-out);
+}
+
 @media (max-width: 720px) {
   .falta-p {
     text-align: left;
+  }
+  /* En el teléfono el título ocupa todo el ancho y las acciones bajan: la principal primero y a lo ancho,
+     las secundarias en dos columnas. Antes competían con el título por la misma fila. */
+  .detail-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .detail-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .detail-actions .btn {
+    justify-content: center;
+    min-height: 44px;
+  }
+  .detail-actions .btn.primary,
+  .detail-actions .falta-p {
+    grid-column: 1 / -1;
+  }
+  .detail-actions .btn.primary {
+    order: -1;
+  }
+  .rows .row .btn,
+  .panel > header .btn {
+    min-height: 44px;
   }
   /* En la tablet y el teléfono, los botones de renglón alcanzan los 44 px táctiles. */
   td.acc .btn,

@@ -1470,7 +1470,6 @@
     const cobrable = editable && importes && tiene('pagos');
     const secundarias = [
       s.estatus === 'EN_REPARACION' && tiene('estatus') ? ['espera', 'Esperar refacción'] : null,
-      editable && tiene('estatus') ? ['tecnico', s.tecnico ? 'Cambiar técnico' : 'Asignar técnico'] : null,
     ].filter(Boolean);
     const agendar =
       s.estatus === 'TERMINADO' && !cita && tiene('citas')
@@ -1483,7 +1482,7 @@
           <div class="crumbs"><a href="#/ordenes">Órdenes</a><span aria-hidden="true" class="dash">/</span><h1>Orden ${s.orden}</h1><span class="chip mono" title="Identificador único del servicio">${s.codigo}</span>${pill(s.estatus)}</div>
           <p class="sub">${esc(s.cliente.nombre)} · ingresó ${fechaHora(s.ingreso)}${s.entrega ? ` · entregado ${fechaHora(s.entrega)} (${Math.max(1, diasCal(s.ingreso, s.entrega))} días en taller)` : ''}${cita ? ` · <a class="btn-link" href="#/citas">cita de entrega: ${fechaCita(cita)} (${cita.estatus.toLowerCase()})</a>` : ''}${hermanos.length ? ` · esta orden tiene otro servicio: <a class="btn-link" href="#/orden/${hermanos[0].codigo}">${hermanos[0].codigo}</a>` : ''}</p>
         </div>
-        <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <div class="actions detail-actions">
           ${agendar}
           ${secundarias.map(([a, t]) => `<button class="btn" type="button" data-act="${a}">${t}</button>`).join('')}
           <button class="btn" type="button" data-act="seguimiento">Enviar seguimiento</button>
@@ -1540,7 +1539,7 @@
           }
           ${!importes ? `<div class="locked"><b>Importes ocultos para el rol Técnico</b><span>Precios, costos y pagos solo los ven Administración y el asesor. Asignado a ${s.tecnico ? PERSONAL[s.tecnico].nombre : 'nadie todavía'}.</span></div>` : ''}
           ${importes && !costos && k.total ? `<div class="locked"><b>Costos y utilidad: solo Administración</b><span>El asesor ve precios y pagos, no costos de refacciones ni utilidad.</span></div>` : ''}
-          <section class="panel"><header><h2>Personal</h2></header><div class="rows">
+          <section class="panel"><header><h2>Personal</h2>${editable && tiene('estatus') ? `<button class="btn small" type="button" data-act="tecnico">${s.tecnico ? 'Cambiar técnico' : 'Asignar técnico'}</button>` : ''}</header><div class="rows">
             <div class="row" style="justify-content:space-between"><span style="color:var(--muted)">Asesor</span>${persona(s.asesor)}</div>
             <div class="row" style="justify-content:space-between"><span style="color:var(--muted)">Técnico</span>${persona(s.tecnico)}</div></div></section>
           ${tiene('bitacora') ? bitacoraDe(s) : ''}
@@ -1564,6 +1563,13 @@
     window.FS.auditar(quien(), accion, antes, despues, s.codigo);
   const recalcular = (s) => {
     s.calc = calcular(s);
+  };
+  // Después de repintar, lo recién capturado se ilumina un instante: el ojo va a lo que cambió.
+  const resaltar = (selector) => {
+    const el = [...view.querySelectorAll(selector)].pop();
+    if (!el || calmo()) return;
+    el.classList.add('recien');
+    el.addEventListener('animationend', () => el.classList.remove('recien'), { once: true });
   };
 
   // Últimos cambios de esta orden, con enlace a la bitácora completa.
@@ -1606,6 +1612,7 @@
         anotar(s, `Agregó el trabajo «${v.trabajo}»`, null, { precio, tabulado: tab });
         toast(`Trabajo agregado a la orden ${s.orden}.`);
         render(false);
+        resaltar('.detail-grid td.acc');
       },
     });
   }
@@ -1680,6 +1687,7 @@
             `Pago de ${money(monto)} registrado.${com.total ? ` Comisión ${money(com.comision)} + IVA ${money(com.iva)}.` : ''}`,
           );
           render(false);
+          resaltar('.pago-r');
         }
       },
     });
@@ -1704,6 +1712,7 @@
         anotar(s, `Revirtió el pago «${concepto}»`, { monto, metodo }, { motivo: v.motivo });
         toast(`Pago revertido. El saldo de la orden ${s.orden} es ${money(s.calc.saldo)}.`);
         render(false);
+        resaltar('.pago-r');
       },
     });
   }
