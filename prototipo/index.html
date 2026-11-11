@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fortaleza Servicar · Taller</title>
   <meta name="robots" content="noindex">
-  <script>try { var t = localStorage.getItem('fs-tema'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
+  <script src="js/tema.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;450;500;550;600;650&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/fortaleza.css">
   <link rel="stylesheet" href="css/fase3.css">
   <link rel="stylesheet" href="css/fase4.css">
+  <link rel="stylesheet" href="css/operacion.css">
 </head>
 <body>
   <div class="app">
@@ -70,6 +71,8 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 2.5h1.8l1.6 8h7.1l1.5-5.5H4.6"/><circle cx="6" cy="13" r="1"/><circle cx="11.5" cy="13" r="1"/></svg>Gastos y compras</a>
       <a class="nav-item" href="#/empleados" data-route="empleados" data-need="empleados">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11.5 6.5v4M9.5 8.5h4"/></svg>Empleados y roles</a>
+      <a class="nav-item" href="#/bitacora" data-route="bitacora" data-need="bitacora">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M8 4.5V8l2.2 1.4"/><path d="M2.6 8a5.4 5.4 0 1 0 1.7-3.9"/><path d="M2.3 2.6v2.6h2.6"/></svg>Bitácora de cambios</a>
       </div>
 
       <div class="nav-group" data-g="pronto">
@@ -77,7 +80,8 @@
       <span class="nav-item" aria-disabled="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11 3.5a2.2 2.2 0 0 1 0 4.2M12.5 10.2c1 .5 1.7 1.6 2 3.3"/></svg>Clientes<span class="phase">Pronto</span></span>
       </div>
 
-      <p class="demo-tag">Demo · datos de muestra</p>
+      <div class="demo-tag"><span>Demo · datos de muestra</span>
+        <button type="button" id="reiniciar" title="Borra lo capturado en este navegador y vuelve a los datos de muestra">Restablecer datos</button></div>
       <div class="themes bottom">
         <span id="tema-lbl">Estilo de color</span>
         <div role="group" aria-labelledby="tema-lbl">
@@ -124,9 +128,11 @@
   <script src="js/graficas.js"></script>
   <script src="js/vehiculos.js"></script>
   <script src="js/datos.js"></script>
+  <script src="js/estados.js"></script>
   <script src="js/diagrama.js"></script>
   <script src="js/datos3.js"></script>
   <script src="js/datos4.js"></script>
+  <script src="js/almacen.js"></script>
   <script src="js/app.js"></script>
   <script src="js/fase3.js"></script>
   <script src="js/fase4.js"></script>

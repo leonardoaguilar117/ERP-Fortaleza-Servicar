@@ -1,0 +1,136 @@
+/* Captura dentro de la orden (cotización, pagos, técnico), bitácora de cambios y restablecer la demostración.
+   Usa los tokens y los tres temas de fortaleza.css; ningún color va escrito a mano. */
+
+/* ---------- encabezados de sección con acción ---------- */
+.sec-title {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.sec-title h2 {
+  margin-right: auto;
+}
+.sec-title .btn {
+  flex: none;
+}
+
+/* ---------- por qué está deshabilitada la acción principal ---------- */
+.falta-p {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- cotización: precio tabulado de referencia y acciones por renglón ---------- */
+.tab-ref {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+th.acc,
+td.acc {
+  width: 1%;
+  padding-left: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ---------- pagos: cada renglón con su reverso ---------- */
+.pago-r {
+  justify-content: space-between;
+  gap: 10px;
+}
+.pago-r > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.pago-r .sub,
+.bit-r .sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+/* Un pago revertido y su reverso se conservan a la vista, pero atenuados: el historial no se borra. */
+.pago-r.anulado > span {
+  color: var(--muted);
+}
+.pago-r.anulado .n {
+  text-decoration: line-through;
+}
+
+/* ---------- bitácora ---------- */
+.bit-r {
+  align-items: flex-start;
+}
+.bit-buscar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 16px;
+}
+.bit-buscar .input {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+.bit-t td {
+  vertical-align: top;
+}
+.bit-kv {
+  display: inline-block;
+  margin: 0 10px 2px 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bit-kv i {
+  color: var(--muted);
+  font-style: normal;
+}
+
+/* ---------- restablecer la demostración (barra lateral) ---------- */
+.demo-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.demo-tag button {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--side-ink, inherit);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: transform var(--t-press) var(--ease-out);
+}
+.demo-tag button:active {
+  transform: scale(0.97);
+}
+.demo-tag button:focus-visible {
+  outline: 2px solid var(--focus, currentColor);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .falta-p {
+    text-align: left;
+  }
+  /* En la tablet y el teléfono, los botones de renglón alcanzan los 44 px táctiles. */
+  td.acc .btn,
+  .pago-r .btn,
+  .sec-title .btn,
+  .demo-tag button {
+    min-height: 44px;
+  }
+}

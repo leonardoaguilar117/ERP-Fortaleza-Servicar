@@ -1,16 +1,46 @@
-// Fase 4 (demostración): Administración. Balance, Bancos y flujos, Empleados y roles.
+// =====================================================================================================================
+// Fase 4 (demostración): Administración — Balance, Bancos y flujos, Empleados y roles
+// ---------------------------------------------------------------------------------------------------------------------
 // "Gastos y compras" vive en js/fase3.js y se muestra dentro de este mismo grupo del menú.
 // Todo se calcula en el navegador a partir de los pagos, compras y gastos de las órdenes (ver js/datos4.js).
+// Lo capturado aquí se edita en su origen y cada cambio queda en la bitácora (F.auditoria).
+// =====================================================================================================================
 (() => {
-  const A = window.FSApp, F = window.FS;
-  const { view, puede, esc, money, toast, setTitle, ICO, seg2, segHtml, tickMoney, suma, I, PALETA, fCorta, bloqueado, formulario, descargar, MES_L } = A;
-  const HOY = F.FLUJO_HOY, INICIO = F.FLUJO_INICIO;
+  const A = window.FSApp,
+    F = window.FS;
+  const {
+    view,
+    puede,
+    esc,
+    money,
+    toast,
+    setTitle,
+    ICO,
+    seg2,
+    segHtml,
+    tickMoney,
+    suma,
+    I,
+    PALETA,
+    fCorta,
+    formulario,
+    descargar,
+    MES_L,
+  } = A;
+  const HOY = F.FLUJO_HOY,
+    INICIO = F.FLUJO_INICIO;
+
+  // ---------------------------------------------------------------------------------------------------------------
+  // Utilidades locales: fechas, tarjetas KPI y signo del dinero (verde ingreso / rojo egreso)
+  // ---------------------------------------------------------------------------------------------------------------
   const sumaDias = (iso, n) => new Date(Date.parse(`${iso}T00:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
   const etiquetasDia = (ds) => ds.map((x) => String(+x.slice(8)));
   const tipsDia = (ds) => ds.map((x) => A.fmtDia(x));
   const kp = (l, ico, v, c, tono, href = '', cls = '') => {
     const cuerpo = `<div class="kpi-top"><div class="kpi-label">${l}</div><span class="kpi-ico">${ico}</span></div><div class="kpi-value num ${cls}">${v}</div><div class="cap">${c}</div>`;
-    return href ? `<a class="kpi" data-rise href="${href}" style="--tono:var(--c-${tono})">${cuerpo}</a>` : `<div class="kpi" data-rise style="--tono:var(--c-${tono})">${cuerpo}</div>`;
+    return href
+      ? `<a class="kpi" data-rise href="${href}" style="--tono:var(--c-${tono})">${cuerpo}</a>`
+      : `<div class="kpi" data-rise style="--tono:var(--c-${tono})">${cuerpo}</div>`;
   };
   const signo = (v) => (v >= 0 ? 'v-pos' : 'v-neg');
   const real = (m) => m.filter((x) => !x.interno); // sin transferencias entre cuentas
@@ -23,62 +53,113 @@
     lock: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>`,
   };
 
-  // ---------- periodo de los flujos: compartido por Balance y Bancos ----------
+  // ---------------------------------------------------------------------------------------------------------------
+  // Periodo de los flujos (Hoy, 7 días, Este mes o fechas elegidas), compartido por Balance y Bancos
+  // ---------------------------------------------------------------------------------------------------------------
   // Los movimientos de la demostración arrancan el 1 de octubre, que es cuando se fijó el saldo inicial de cada cuenta.
   let rF = { k: 'mes', desde: INICIO, hasta: HOY };
   const PRESETS = { hoy: () => [HOY, HOY], '7d': () => [sumaDias(HOY, -6), HOY], mes: () => [INICIO, HOY] };
   const fechaL = (iso) => `${+iso.slice(8)} de ${MES_L[+iso.slice(5, 7) - 1]}`;
-  const rangoTxt = (r) => (r.desde === r.hasta ? `el ${fechaL(r.desde)}` : `del ${fechaL(r.desde)} al ${fechaL(r.hasta)}`);
+  const rangoTxt = (r) =>
+    r.desde === r.hasta ? `el ${fechaL(r.desde)}` : `del ${fechaL(r.desde)} al ${fechaL(r.hasta)}`;
   const enRango = (f) => f >= rF.desde && f <= rF.hasta;
-  const diasRango = () => { const d = []; for (let f = rF.desde; f <= rF.hasta; f = sumaDias(f, 1)) d.push(f); return d; };
-  const periodoHtml = (extra = '') => `<div class="actions periodo">${segHtml([['hoy', 'Hoy'], ['7d', '7 días'], ['mes', 'Este mes'], ['otro', 'Elegir fechas']], rF.k, 'Periodo de los flujos')}
+  const diasRango = () => {
+    const d = [];
+    for (let f = rF.desde; f <= rF.hasta; f = sumaDias(f, 1)) d.push(f);
+    return d;
+  };
+  const periodoHtml = (extra = '') => `<div class="actions periodo">${segHtml(
+    [
+      ['hoy', 'Hoy'],
+      ['7d', '7 días'],
+      ['mes', 'Este mes'],
+      ['otro', 'Elegir fechas'],
+    ],
+    rF.k,
+    'Periodo de los flujos',
+  )}
       <div class="fechas" ${rF.k === 'otro' ? '' : 'hidden'}><label><span class="sr">Desde</span><input type="date" id="p-desde" value="${rF.desde}" min="${INICIO}" max="${HOY}"></label><span aria-hidden="true">–</span><label><span class="sr">Hasta</span><input type="date" id="p-hasta" value="${rF.hasta}" min="${INICIO}" max="${HOY}"></label></div>${extra}</div>`;
   function periodoEventos() {
-    const fechas = view.querySelector('.periodo .fechas'), fd = view.querySelector('#p-desde'), fh = view.querySelector('#p-hasta');
+    const fechas = view.querySelector('.periodo .fechas'),
+      fd = view.querySelector('#p-desde'),
+      fh = view.querySelector('#p-hasta');
     seg2(view.querySelector('.periodo .seg2'), (k) => {
-      if (k === 'otro') { fechas.hidden = false; rF.k = 'otro'; fd.focus(); return; }
-      const [desde, hasta] = PRESETS[k](); rF = { k, desde, hasta }; A.render(false);
+      if (k === 'otro') {
+        fechas.hidden = false;
+        rF.k = 'otro';
+        fd.focus();
+        return;
+      }
+      const [desde, hasta] = PRESETS[k]();
+      rF = { k, desde, hasta };
+      A.render(false);
     });
     const cambiar = () => {
       if (!fd.value || !fh.value) return;
       const [a, b] = [fd.value, fh.value].map((v) => (v < INICIO ? INICIO : v > HOY ? HOY : v)).sort();
-      rF = { k: 'otro', desde: a, hasta: b }; A.render(false);
+      rF = { k: 'otro', desde: a, hasta: b };
+      A.render(false);
     };
-    fd.addEventListener('change', cambiar); fh.addEventListener('change', cambiar);
+    fd.addEventListener('change', cambiar);
+    fh.addEventListener('change', cambiar);
   }
   // un solo día no dibuja tendencia: se muestra el total y se pide un periodo más largo
   const tendencia = (host, ds, serie) => {
-    if (ds.length < 2) { host.innerHTML = '<div class="empty">Elige un periodo de dos días o más para ver la tendencia; los totales están arriba.</div>'; return; }
+    if (ds.length < 2) {
+      host.innerHTML =
+        '<div class="empty">Elige un periodo de dos días o más para ver la tendencia; los totales están arriba.</div>';
+      return;
+    }
     Graficas.area(host, { labels: etiquetasDia(ds), tips: tipsDia(ds), height: 250, series: [serie] });
   };
-  const saldoAl = (id, todos, f) => F.saldoDe(id, todos.filter((x) => x.fecha <= f));
+  const saldoAl = (id, todos, f) =>
+    F.saldoDe(
+      id,
+      todos.filter((x) => x.fecha <= f),
+    );
 
   // =====================================================================================================
   // BALANCE
+  // Flujo del periodo (ingresos, egresos, neto, saldo), egresos por categoría, "situación a hoy" y resultado
+  // (utilidad de lo entregado − gastos del taller; las compras ya están dentro de la utilidad).
   // =====================================================================================================
   function renderBalance() {
     setTitle('Balance');
-    if (!puede.tiene('flujos')) { bloqueado('Balance'); return; }
-    const todos = F.movimientos(), mov = real(todos).filter((x) => enRango(x.fecha));
+    const todos = F.movimientos(),
+      mov = real(todos).filter((x) => enRango(x.fecha));
     const ing = suma(mov.filter((x) => x.tipo === 'ingreso').map((x) => x.monto));
-    const compras = suma(mov.filter((x) => x.tipo === 'egreso' && x.categoria === 'Compras para órdenes').map((x) => x.monto));
-    const gastosOp = suma(mov.filter((x) => x.tipo === 'egreso' && x.categoria !== 'Compras para órdenes').map((x) => x.monto));
-    const egr = suma([compras, gastosOp]), neto = suma([ing, -egr]);
+    const compras = suma(
+      mov.filter((x) => x.tipo === 'egreso' && x.categoria === 'Compras para órdenes').map((x) => x.monto),
+    );
+    const gastosOp = suma(
+      mov.filter((x) => x.tipo === 'egreso' && x.categoria !== 'Compras para órdenes').map((x) => x.monto),
+    );
+    const egr = suma([compras, gastosOp]),
+      neto = suma([ing, -egr]);
     const enCuentas = suma(F.cuentas.map((c) => saldoAl(c.id, todos, rF.hasta)));
     // situación a hoy: no depende del periodo
     const piso = F.servicios.filter((s) => s.estatus !== 'ENTREGADO');
     const porCobrar = suma(piso.map((s) => Math.max(0, s.calc.saldo)));
     const porPagar = suma(F.compras.filter((c) => c.estatus === 'pendiente').map((c) => c.costo));
     const saldos = F.cuentas.map((c) => ({ ...c, saldo: F.saldoDe(c.id, todos) }));
-    const efectivo = suma(saldos.filter((c) => c.tipo === 'Efectivo').map((c) => c.saldo)), bancos = suma(saldos.filter((c) => c.tipo !== 'Efectivo').map((c) => c.saldo));
-    const activos = suma([efectivo, bancos, porCobrar]), capital = suma([activos, -porPagar]);
+    const efectivo = suma(saldos.filter((c) => c.tipo === 'Efectivo').map((c) => c.saldo)),
+      bancos = suma(saldos.filter((c) => c.tipo !== 'Efectivo').map((c) => c.saldo));
+    const activos = suma([efectivo, bancos, porCobrar]),
+      capital = suma([activos, -porPagar]);
     const entregados = F.servicios.filter((s) => s.estatus === 'ENTREGADO' && enRango(s.entrega.slice(0, 10)));
-    const utilidad = suma(entregados.map((s) => s.calc.utilidad)), resultado = suma([utilidad, -gastosOp]);
+    const utilidad = suma(entregados.map((s) => s.calc.utilidad)),
+      resultado = suma([utilidad, -gastosOp]);
     const cats = {};
-    mov.filter((x) => x.tipo === 'egreso').forEach((x) => { cats[x.categoria] = suma([cats[x.categoria] || 0, x.monto]); });
+    mov
+      .filter((x) => x.tipo === 'egreso')
+      .forEach((x) => {
+        cats[x.categoria] = suma([cats[x.categoria] || 0, x.monto]);
+      });
     const filasCat = Object.entries(cats).sort((a, b) => b[1] - a[1]);
-    const ds = diasRango(), saldoDia = ds.map((d) => suma(F.cuentas.map((c) => saldoAl(c.id, todos, d))));
-    const fila = (t, v, cls = '', href = '') => `<tr${href ? ` class="link" tabindex="0" data-href="${href}"` : ''}><td>${t}</td><td class="n ${cls}">${v}</td></tr>`;
+    const ds = diasRango(),
+      saldoDia = ds.map((d) => suma(F.cuentas.map((c) => saldoAl(c.id, todos, d))));
+    const fila = (t, v, cls = '', href = '') =>
+      `<tr${href ? ` class="link" tabindex="0" data-href="${href}"` : ''}><td>${t}</td><td class="n ${cls}">${v}</td></tr>`;
     const etiqueta = rangoTxt(rF);
 
     view.innerHTML = `
@@ -113,63 +194,183 @@
           <p class="note">La utilidad ya descuenta lo que costaron las refacciones y el TOT de cada orden, por eso aquí no se restan otra vez. Los gastos del taller (renta, nómina, luz) son datos de muestra: el Excel actual no los captura.</p></section>
       </div>`;
     periodoEventos();
-    view.querySelectorAll('tr.link').forEach((tr) => tr.addEventListener('click', () => { location.hash = tr.dataset.href; }));
-    view.querySelector('[data-export]').addEventListener('click', () => descargar(`balance-${rF.desde}-a-${rF.hasta}.csv`, ['Concepto', 'Monto'], [
-      ['Periodo', `${rF.desde} a ${rF.hasta}`], ['Ingresos', ing], ['Egresos por compras', -compras], ['Egresos por gastos y otros', -gastosOp], ['Flujo neto', neto], ['Saldo en cuentas al cierre', enCuentas],
-      ['Utilidad de servicios entregados', utilidad], ['Resultado', resultado], ['Efectivo en caja (hoy)', efectivo], ['Dinero en bancos (hoy)', bancos], ['Por cobrar a clientes (hoy)', porCobrar], ['Por pagar a proveedores (hoy)', -porPagar],
-    ]));
-    tendencia(document.getElementById('chart-bal'), ds, { label: 'Saldo en cuentas', values: saldoDia, color: 'var(--c-blue)', format: money, tick: tickMoney });
-    Graficas.pastel(document.getElementById('chart-egr'), { rows: filasCat.map(([label, value], i) => ({ label, value, color: A.EGRESOS[i % A.EGRESOS.length], href: label === 'Compras para órdenes' ? '#/compras' : '#/bancos?tipo=egreso' })), format: tickMoney, pill: (v) => `${Math.round(v / 1000)}k`, vacio: `Sin egresos ${etiqueta}` });
+    view.querySelectorAll('tr.link').forEach((tr) =>
+      tr.addEventListener('click', () => {
+        location.hash = tr.dataset.href;
+      }),
+    );
+    view.querySelector('[data-export]').addEventListener('click', () =>
+      descargar(
+        `balance-${rF.desde}-a-${rF.hasta}.csv`,
+        ['Concepto', 'Monto'],
+        [
+          ['Periodo', `${rF.desde} a ${rF.hasta}`],
+          ['Ingresos', ing],
+          ['Egresos por compras', -compras],
+          ['Egresos por gastos y otros', -gastosOp],
+          ['Flujo neto', neto],
+          ['Saldo en cuentas al cierre', enCuentas],
+          ['Utilidad de servicios entregados', utilidad],
+          ['Resultado', resultado],
+          ['Efectivo en caja (hoy)', efectivo],
+          ['Dinero en bancos (hoy)', bancos],
+          ['Por cobrar a clientes (hoy)', porCobrar],
+          ['Por pagar a proveedores (hoy)', -porPagar],
+        ],
+      ),
+    );
+    tendencia(document.getElementById('chart-bal'), ds, {
+      label: 'Saldo en cuentas',
+      values: saldoDia,
+      color: 'var(--c-blue)',
+      format: money,
+      tick: tickMoney,
+    });
+    Graficas.pastel(document.getElementById('chart-egr'), {
+      rows: filasCat.map(([label, value], i) => ({
+        label,
+        value,
+        color: A.EGRESOS[i % A.EGRESOS.length],
+        href: label === 'Compras para órdenes' ? '#/compras' : '#/bancos?tipo=egreso',
+      })),
+      format: tickMoney,
+      pill: (v) => `${Math.round(v / 1000)}k`,
+      vacio: `Sin egresos ${etiqueta}`,
+    });
   }
 
   // =====================================================================================================
   // BANCOS Y FLUJOS
+  // Movimientos por cuenta. Los ingresos llegan solos de los pagos de las órdenes y los egresos de compras y
+  // gastos; aquí se capturan los manuales y los traspasos (que mueven saldo sin contar como ingreso ni egreso).
   // =====================================================================================================
   function nuevoMovimiento() {
     const cuentas = F.cuentas.map((c) => [c.id, c.nombre]);
     formulario({
-      titulo: 'Nuevo movimiento', sub: 'Ingresos, egresos y traspasos entre cuentas. Los cobros y las compras ya entran solos desde las órdenes.',
+      titulo: 'Nuevo movimiento',
+      sub: 'Ingresos, egresos y traspasos entre cuentas. Los cobros y las compras ya entran solos desde las órdenes.',
       campos: [
-        { id: 'tipo', label: 'Tipo', tipo: 'select', valor: 'ingreso', opts: [['ingreso', 'Ingreso'], ['egreso', 'Egreso'], ['transferencia', 'Traspaso entre cuentas']] },
+        {
+          id: 'tipo',
+          label: 'Tipo',
+          tipo: 'select',
+          valor: 'ingreso',
+          opts: [
+            ['ingreso', 'Ingreso'],
+            ['egreso', 'Egreso'],
+            ['transferencia', 'Traspaso entre cuentas'],
+          ],
+        },
         { id: 'monto', label: 'Monto', tipo: 'number', req: true, pista: '0.00' },
         { id: 'cuenta', label: 'Cuenta (origen)', tipo: 'select', valor: 'bbva', opts: cuentas },
-        { id: 'destino', label: 'Cuenta destino', tipo: 'select', valor: 'caja', opts: cuentas, hint: 'Solo se usa en los traspasos.' },
-        { id: 'concepto', label: 'Concepto', req: true, span: 2, pista: 'Ej. Aportación del dueño, pago de un préstamo' },
+        {
+          id: 'destino',
+          label: 'Cuenta destino',
+          tipo: 'select',
+          valor: 'caja',
+          opts: cuentas,
+          hint: 'Solo se usa en los traspasos.',
+        },
+        {
+          id: 'concepto',
+          label: 'Concepto',
+          req: true,
+          span: 2,
+          pista: 'Ej. Aportación del dueño, pago de un préstamo',
+        },
         { id: 'fecha', label: 'Fecha', tipo: 'date', req: true, valor: HOY },
       ],
       alGuardar: (v) => {
-        const monto = +v.monto || 0, id = `m${Date.now()}`;
-        if (v.fecha < INICIO || v.fecha > HOY) { toast(`La fecha debe estar entre el ${fechaL(INICIO)} y hoy.`); return; }
+        const monto = +v.monto || 0,
+          id = `m${Date.now()}`;
+        if (v.fecha < INICIO || v.fecha > HOY) {
+          toast(`La fecha debe estar entre el ${fechaL(INICIO)} y hoy.`);
+          return;
+        }
         if (v.tipo === 'transferencia') {
-          if (v.cuenta === v.destino) { toast('El origen y el destino deben ser cuentas distintas.'); return; }
-          F.manuales.push({ id, fecha: v.fecha, cuenta: v.cuenta, tipo: 'egreso', concepto: v.concepto, monto, interno: true, par: `${id}b` }, { id: `${id}b`, fecha: v.fecha, cuenta: v.destino, tipo: 'ingreso', concepto: v.concepto, monto, interno: true, par: id });
-        } else F.manuales.push({ id, fecha: v.fecha, cuenta: v.cuenta, tipo: v.tipo, concepto: v.concepto, monto, interno: false });
-        toast('Movimiento registrado.'); A.render(false);
+          if (v.cuenta === v.destino) {
+            toast('El origen y el destino deben ser cuentas distintas.');
+            return;
+          }
+          F.manuales.push(
+            {
+              id,
+              fecha: v.fecha,
+              cuenta: v.cuenta,
+              tipo: 'egreso',
+              concepto: v.concepto,
+              monto,
+              interno: true,
+              par: `${id}b`,
+            },
+            {
+              id: `${id}b`,
+              fecha: v.fecha,
+              cuenta: v.destino,
+              tipo: 'ingreso',
+              concepto: v.concepto,
+              monto,
+              interno: true,
+              par: id,
+            },
+          );
+        } else
+          F.manuales.push({
+            id,
+            fecha: v.fecha,
+            cuenta: v.cuenta,
+            tipo: v.tipo,
+            concepto: v.concepto,
+            monto,
+            interno: false,
+          });
+        toast('Movimiento registrado.');
+        A.render(false);
       },
     });
   }
 
-  // ---------- editar y eliminar ----------
+  // ---------------------------------------------------------------------------------------------------------------
+  // Editar y eliminar con bitácora
   // Se edita en su origen: un gasto en la lista de gastos, una compra en su renglón de la orden (y se recalcula la
   // utilidad), un movimiento manual en sí mismo. Cada cambio queda en la bitácora con quién, qué había y qué quedó.
+  // ---------------------------------------------------------------------------------------------------------------
   const quien = () => A.ROL_NOMBRE[A.rol()];
-  const auditar = (accion, antes, despues) => F.auditoria.unshift({ fecha: new Date().toISOString(), quien: quien(), accion, antes, despues });
+  const auditar = (accion, antes, despues) => F.auditar(quien(), accion, antes, despues);
   const opCuentas = () => F.cuentas.map((c) => [c.id, c.nombre]);
-  const fechaOk = (f) => { if (f < INICIO || f > HOY) { toast(`La fecha debe estar entre el ${fechaL(INICIO)} y hoy.`); return false; } return true; };
-  const montoOk = (v) => { if (!(+v > 0)) { toast('El monto debe ser mayor que cero.'); return false; } return true; };
+  const fechaOk = (f) => {
+    if (f < INICIO || f > HOY) {
+      toast(`La fecha debe estar entre el ${fechaL(INICIO)} y hoy.`);
+      return false;
+    }
+    return true;
+  };
+  const montoOk = (v) => {
+    if (!(+v > 0)) {
+      toast('El monto debe ser mayor que cero.');
+      return false;
+    }
+    return true;
+  };
   const copia = (o) => JSON.parse(JSON.stringify(o, (k, v) => (k === 'linea' ? undefined : v)));
-  const confirmar = (titulo, sub, accion) => formulario({ titulo, sub, campos: [], guardar: 'Eliminar', alGuardar: accion });
-  const acciones = (x) => (x.origen === 'cobro'
-    ? `<div class="acc-f"><a class="btn small ghost" href="#/orden/${x.servicio}" title="Los cobros se registran y corrigen en su orden">Ver orden</a></div>`
-    : `<div class="acc-f"><button class="btn small" type="button" data-edit="${x.origen}:${x.ref}">Editar</button>${x.origen === 'compra' ? '' : `<button class="btn small ghost" type="button" data-del="${x.origen}:${x.ref}">Eliminar</button>`}</div>`);
+  const confirmar = (titulo, sub, accion) =>
+    formulario({ titulo, sub, campos: [], guardar: 'Eliminar', alGuardar: accion });
+  const acciones = (x) =>
+    x.origen === 'cobro'
+      ? `<div class="acc-f"><a class="btn small ghost" href="#/orden/${x.servicio}" title="Los cobros se registran y corrigen en su orden">Ver orden</a></div>`
+      : `<div class="acc-f"><button class="btn small" type="button" data-edit="${x.origen}:${x.ref}">Editar</button>${x.origen === 'compra' ? '' : `<button class="btn small ghost" type="button" data-del="${x.origen}:${x.ref}">Eliminar</button>`}</div>`;
 
   function editarManual(id) {
     const x = F.manuales.find((m) => m.id === id);
     if (!x) return;
     if (x.interno) {
-      const par = F.manuales.find((m) => m.id === x.par), sale = x.tipo === 'egreso' ? x : par, entra = sale === x ? par : x;
+      const par = F.manuales.find((m) => m.id === x.par),
+        sale = x.tipo === 'egreso' ? x : par,
+        entra = sale === x ? par : x;
       formulario({
-        titulo: 'Editar traspaso', sub: 'Mueve dinero entre dos cuentas del taller; no cuenta como ingreso ni egreso.', guardar: 'Guardar cambios',
+        titulo: 'Editar traspaso',
+        sub: 'Mueve dinero entre dos cuentas del taller; no cuenta como ingreso ni egreso.',
+        guardar: 'Guardar cambios',
         campos: [
           { id: 'monto', label: 'Monto', tipo: 'number', req: true, valor: sale.monto },
           { id: 'fecha', label: 'Fecha', tipo: 'date', req: true, valor: sale.fecha },
@@ -179,19 +380,47 @@
         ],
         alGuardar: (v) => {
           if (!montoOk(v.monto) || !fechaOk(v.fecha)) return;
-          if (v.cuenta === v.destino) { toast('El origen y el destino deben ser cuentas distintas.'); return; }
+          if (v.cuenta === v.destino) {
+            toast('El origen y el destino deben ser cuentas distintas.');
+            return;
+          }
           const antes = copia(sale);
-          Object.assign(sale, { monto: +v.monto, fecha: v.fecha, cuenta: v.cuenta, concepto: v.concepto, editado: true });
-          Object.assign(entra, { monto: +v.monto, fecha: v.fecha, cuenta: v.destino, concepto: v.concepto, editado: true });
-          auditar('Editó un traspaso', antes, copia(sale)); toast('Traspaso actualizado. El cambio queda en la bitácora.'); A.render(false);
+          Object.assign(sale, {
+            monto: +v.monto,
+            fecha: v.fecha,
+            cuenta: v.cuenta,
+            concepto: v.concepto,
+            editado: true,
+          });
+          Object.assign(entra, {
+            monto: +v.monto,
+            fecha: v.fecha,
+            cuenta: v.destino,
+            concepto: v.concepto,
+            editado: true,
+          });
+          auditar('Editó un traspaso', antes, copia(sale));
+          toast('Traspaso actualizado. El cambio queda en la bitácora.');
+          A.render(false);
         },
       });
       return;
     }
     formulario({
-      titulo: `Editar ${x.tipo === 'ingreso' ? 'ingreso' : 'egreso'}`, sub: 'Movimiento capturado a mano en Bancos y flujos.', guardar: 'Guardar cambios',
+      titulo: `Editar ${x.tipo === 'ingreso' ? 'ingreso' : 'egreso'}`,
+      sub: 'Movimiento capturado a mano en Bancos y flujos.',
+      guardar: 'Guardar cambios',
       campos: [
-        { id: 'tipo', label: 'Tipo', tipo: 'select', valor: x.tipo, opts: [['ingreso', 'Ingreso'], ['egreso', 'Egreso']] },
+        {
+          id: 'tipo',
+          label: 'Tipo',
+          tipo: 'select',
+          valor: x.tipo,
+          opts: [
+            ['ingreso', 'Ingreso'],
+            ['egreso', 'Egreso'],
+          ],
+        },
         { id: 'monto', label: 'Monto', tipo: 'number', req: true, valor: x.monto },
         { id: 'cuenta', label: 'Cuenta', tipo: 'select', valor: x.cuenta, opts: opCuentas() },
         { id: 'fecha', label: 'Fecha', tipo: 'date', req: true, valor: x.fecha },
@@ -200,27 +429,53 @@
       alGuardar: (v) => {
         if (!montoOk(v.monto) || !fechaOk(v.fecha)) return;
         const antes = copia(x);
-        Object.assign(x, { tipo: v.tipo, monto: +v.monto, cuenta: v.cuenta, fecha: v.fecha, concepto: v.concepto, editado: true });
-        auditar(`Editó un ${v.tipo}`, antes, copia(x)); toast(`${v.tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} actualizado. El cambio queda en la bitácora.`); A.render(false);
+        Object.assign(x, {
+          tipo: v.tipo,
+          monto: +v.monto,
+          cuenta: v.cuenta,
+          fecha: v.fecha,
+          concepto: v.concepto,
+          editado: true,
+        });
+        auditar(`Editó un ${v.tipo}`, antes, copia(x));
+        toast(`${v.tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} actualizado. El cambio queda en la bitácora.`);
+        A.render(false);
       },
     });
   }
   function eliminarManual(id) {
     const x = F.manuales.find((m) => m.id === id);
     if (!x) return;
-    confirmar(`¿Eliminar este ${x.interno ? 'traspaso' : x.tipo}?`, `${esc(x.concepto)} · ${money(x.monto)} · ${fCorta(x.fecha)}. El saldo de la cuenta se recalcula y queda registro en la bitácora.`, () => {
-      const ids = [x.id, x.par].filter(Boolean);
-      ids.forEach((k) => { const i = F.manuales.findIndex((m) => m.id === k); if (i >= 0) F.manuales.splice(i, 1); });
-      auditar(`Eliminó un ${x.interno ? 'traspaso' : x.tipo}`, copia(x), null); toast('Movimiento eliminado.'); A.render(false);
-    });
+    confirmar(
+      `¿Eliminar este ${x.interno ? 'traspaso' : x.tipo}?`,
+      `${esc(x.concepto)} · ${money(x.monto)} · ${fCorta(x.fecha)}. El saldo de la cuenta se recalcula y queda registro en la bitácora.`,
+      () => {
+        const ids = [x.id, x.par].filter(Boolean);
+        ids.forEach((k) => {
+          const i = F.manuales.findIndex((m) => m.id === k);
+          if (i >= 0) F.manuales.splice(i, 1);
+        });
+        auditar(`Eliminó un ${x.interno ? 'traspaso' : x.tipo}`, copia(x), null);
+        toast('Movimiento eliminado.');
+        A.render(false);
+      },
+    );
   }
   function editarGasto(id) {
     const g = F.gastos.find((x) => x.id === id);
     if (!g) return;
     formulario({
-      titulo: 'Editar gasto', sub: 'Gasto del taller que no pertenece a una orden.', guardar: 'Guardar cambios',
+      titulo: 'Editar gasto',
+      sub: 'Gasto del taller que no pertenece a una orden.',
+      guardar: 'Guardar cambios',
       campos: [
-        { id: 'categoria', label: 'Categoría', tipo: 'select', valor: g.categoria, opts: F.CATEGORIAS.map((c) => [c, c]) },
+        {
+          id: 'categoria',
+          label: 'Categoría',
+          tipo: 'select',
+          valor: g.categoria,
+          opts: F.CATEGORIAS.map((c) => [c, c]),
+        },
         { id: 'monto', label: 'Monto', tipo: 'number', req: true, valor: g.monto },
         { id: 'concepto', label: 'Concepto', req: true, span: 2, valor: g.concepto },
         { id: 'fecha', label: 'Fecha', tipo: 'date', req: true, valor: g.fecha },
@@ -230,66 +485,147 @@
       alGuardar: (v) => {
         if (!montoOk(v.monto) || !fechaOk(v.fecha)) return;
         const antes = copia(g);
-        Object.assign(g, { categoria: v.categoria, monto: +v.monto, concepto: v.concepto, fecha: v.fecha, cuenta: v.cuenta, proveedor: v.proveedor, editado: true });
-        auditar('Editó un gasto', antes, copia(g)); toast('Gasto actualizado. El cambio queda en la bitácora.'); A.render(false);
+        Object.assign(g, {
+          categoria: v.categoria,
+          monto: +v.monto,
+          concepto: v.concepto,
+          fecha: v.fecha,
+          cuenta: v.cuenta,
+          proveedor: v.proveedor,
+          editado: true,
+        });
+        auditar('Editó un gasto', antes, copia(g));
+        toast('Gasto actualizado. El cambio queda en la bitácora.');
+        A.render(false);
       },
     });
   }
   function eliminarGasto(id) {
-    const i = F.gastos.findIndex((x) => x.id === id), g = F.gastos[i];
+    const i = F.gastos.findIndex((x) => x.id === id),
+      g = F.gastos[i];
     if (!g) return;
-    confirmar('¿Eliminar este gasto?', `${esc(g.concepto)} · ${money(g.monto)} · ${fCorta(g.fecha)}. Queda registro en la bitácora.`, () => {
-      F.gastos.splice(i, 1); auditar('Eliminó un gasto', copia(g), null); toast('Gasto eliminado.'); A.render(false);
-    });
+    confirmar(
+      '¿Eliminar este gasto?',
+      `${esc(g.concepto)} · ${money(g.monto)} · ${fCorta(g.fecha)}. Queda registro en la bitácora.`,
+      () => {
+        F.gastos.splice(i, 1);
+        auditar('Eliminó un gasto', copia(g), null);
+        toast('Gasto eliminado.');
+        A.render(false);
+      },
+    );
   }
   function editarCompra(id) {
     const c = F.compras.find((x) => x.id === id);
     if (!c) return;
     const s = F.servicios.find((x) => x.codigo === c.servicio);
     formulario({
-      titulo: 'Editar compra', sub: `Refacción o TOT de la orden ${c.orden}. Al guardar se recalcula la utilidad de esa orden.`, guardar: 'Guardar cambios',
+      titulo: 'Editar compra',
+      sub: `Refacción o TOT de la orden ${c.orden}. Al guardar se recalcula la utilidad de esa orden.`,
+      guardar: 'Guardar cambios',
       campos: [
         { id: 'concepto', label: 'Descripción y número de parte', req: true, span: 2, valor: c.concepto },
-        { id: 'proveedor', label: 'Proveedor', req: true, valor: c.proveedor, lista: [...new Set(F.compras.map((x) => x.proveedor).filter(Boolean))] },
+        {
+          id: 'proveedor',
+          label: 'Proveedor',
+          req: true,
+          valor: c.proveedor,
+          lista: [...new Set(F.compras.map((x) => x.proveedor).filter(Boolean))],
+        },
         { id: 'costo', label: 'Costo', tipo: 'number', req: true, valor: c.costo },
         { id: 'factura', label: 'Factura o remisión del proveedor', valor: c.factura || '' },
-        { id: 'fecha', label: 'Fecha de compra', tipo: 'date', valor: c.fecha || '', hint: 'Déjala vacía si aún está por comprar.' },
+        {
+          id: 'fecha',
+          label: 'Fecha de compra',
+          tipo: 'date',
+          valor: c.fecha || '',
+          hint: 'Déjala vacía si aún está por comprar.',
+        },
       ],
       alGuardar: (v) => {
         if (!montoOk(v.costo) || (v.fecha && !fechaOk(v.fecha))) return;
-        const antes = copia(c), fecha = v.fecha || null;
-        const estatus = c.estatus === 'propio' ? 'propio' : !fecha ? 'por_comprar' : c.estatus === 'por_comprar' ? 'pendiente' : c.estatus;
-        Object.assign(c, { concepto: v.concepto, proveedor: v.proveedor, costo: +v.costo, factura: v.factura || null, fecha, estatus, editado: true });
-        if (c.linea) { c.linea[0] = c.concepto; c.linea[1] = c.costo; c.linea[2] = c.proveedor; c.linea[3] = c.factura; c.linea[4] = fecha; }
+        const antes = copia(c),
+          fecha = v.fecha || null;
+        const estatus =
+          c.estatus === 'propio'
+            ? 'propio'
+            : !fecha
+              ? 'por_comprar'
+              : c.estatus === 'por_comprar'
+                ? 'pendiente'
+                : c.estatus;
+        Object.assign(c, {
+          concepto: v.concepto,
+          proveedor: v.proveedor,
+          costo: +v.costo,
+          factura: v.factura || null,
+          fecha,
+          estatus,
+          editado: true,
+        });
+        if (c.linea) {
+          c.linea[0] = c.concepto;
+          c.linea[1] = c.costo;
+          c.linea[2] = c.proveedor;
+          c.linea[3] = c.factura;
+          c.linea[4] = fecha;
+        }
         const util0 = s?.calc.utilidad;
         if (s) s.calc = F.calcular(s);
         auditar('Editó una compra', antes, copia(c));
-        toast(`Compra actualizada.${s && util0 !== s.calc.utilidad ? ` La utilidad de la orden ${c.orden} pasó de ${money(util0)} a ${money(s.calc.utilidad)}.` : ''} El cambio queda en la bitácora.`);
+        toast(
+          `Compra actualizada.${s && util0 !== s.calc.utilidad ? ` La utilidad de la orden ${c.orden} pasó de ${money(util0)} a ${money(s.calc.utilidad)}.` : ''} El cambio queda en la bitácora.`,
+        );
         A.render(false);
       },
     });
   }
+  // Despacho por origen del movimiento (data-edit="origen:id"): cada origen sabe editarse a sí mismo.
   const EDITAR = { manual: editarManual, gasto: editarGasto, compra: editarCompra };
   const ELIMINAR = { manual: eliminarManual, gasto: eliminarGasto };
   Object.assign(A, { editarGasto, eliminarGasto, editarCompra });
 
   function renderBancos(_, params) {
     setTitle('Bancos y flujos');
-    if (!puede.tiene('flujos')) { bloqueado('Bancos y flujos'); return; }
     const todos = F.movimientos();
     const fc = F.cuentas.some((c) => c.id === params.get('cuenta')) ? params.get('cuenta') : '';
     const ft = ['ingreso', 'egreso'].includes(params.get('tipo')) ? params.get('tipo') : '';
     const q = (params.get('q') || '').toLowerCase();
     const delPeriodo = todos.filter((x) => enRango(x.fecha));
-    const lista = delPeriodo.filter((x) => (!fc || x.cuenta === fc) && (!ft || x.tipo === ft) && (!q || `${x.concepto} ${x.detalle || ''} ${x.categoria}`.toLowerCase().includes(q)));
-    const enlace = (o) => { const p = new URLSearchParams({ ...(fc && { cuenta: fc }), ...(ft && { tipo: ft }), ...(q && { q }), ...o }); [...p].forEach(([k, v]) => { if (!v) p.delete(k); }); const s = p.toString(); return `#/bancos${s ? `?${s}` : ''}`; };
-    const entradas = suma(real(delPeriodo).filter((x) => x.tipo === 'ingreso' && (!fc || x.cuenta === fc)).map((x) => x.monto));
-    const salidas = suma(real(delPeriodo).filter((x) => x.tipo === 'egreso' && (!fc || x.cuenta === fc)).map((x) => x.monto));
+    const lista = delPeriodo.filter(
+      (x) =>
+        (!fc || x.cuenta === fc) &&
+        (!ft || x.tipo === ft) &&
+        (!q || `${x.concepto} ${x.detalle || ''} ${x.categoria}`.toLowerCase().includes(q)),
+    );
+    const enlace = (o) => {
+      const p = new URLSearchParams({ ...(fc && { cuenta: fc }), ...(ft && { tipo: ft }), ...(q && { q }), ...o });
+      [...p].forEach(([k, v]) => {
+        if (!v) p.delete(k);
+      });
+      const s = p.toString();
+      return `#/bancos${s ? `?${s}` : ''}`;
+    };
+    const entradas = suma(
+      real(delPeriodo)
+        .filter((x) => x.tipo === 'ingreso' && (!fc || x.cuenta === fc))
+        .map((x) => x.monto),
+    );
+    const salidas = suma(
+      real(delPeriodo)
+        .filter((x) => x.tipo === 'egreso' && (!fc || x.cuenta === fc))
+        .map((x) => x.monto),
+    );
     const etiqueta = rangoTxt(rF);
-    const tarjetaCuenta = (c) => `<a class="kpi kpi-f" href="${enlace({ cuenta: fc === c.id ? '' : c.id })}" aria-current="${fc === c.id}" style="--tono:var(--c-${c.tono})"><div class="kpi-top"><div class="kpi-label">${esc(c.nombre)}</div><span class="kpi-ico">${c.tipo === 'Efectivo' ? ICO.cash : ICO4.bank}</span></div><div class="kpi-value num">${money(saldoAl(c.id, todos, rF.hasta))}</div><div class="cap">${c.tipo} · saldo al ${fechaL(rF.hasta)}${fc === c.id ? ' · filtrada' : ''}</div></a>`;
-    const ds = diasRango(), cuentasVis = F.cuentas.filter((c) => !fc || c.id === fc);
+    const tarjetaCuenta = (c) =>
+      `<a class="kpi kpi-f" href="${enlace({ cuenta: fc === c.id ? '' : c.id })}" aria-current="${fc === c.id}" style="--tono:var(--c-${c.tono})"><div class="kpi-top"><div class="kpi-label">${esc(c.nombre)}</div><span class="kpi-ico">${c.tipo === 'Efectivo' ? ICO.cash : ICO4.bank}</span></div><div class="kpi-value num">${money(saldoAl(c.id, todos, rF.hasta))}</div><div class="cap">${c.tipo} · saldo al ${fechaL(rF.hasta)}${fc === c.id ? ' · filtrada' : ''}</div></a>`;
+    const ds = diasRango(),
+      cuentasVis = F.cuentas.filter((c) => !fc || c.id === fc);
     const serie = ds.map((d) => suma(cuentasVis.map((c) => saldoAl(c.id, todos, d))));
-    const chips = (fc || ft || q) ? `<div class="chips-f">${fc ? `<a class="chip-b" href="${enlace({ cuenta: '' })}">${esc(nombreCuenta(fc))} ✕</a>` : ''}${ft ? `<a class="chip-b" href="${enlace({ tipo: '' })}">${ft === 'ingreso' ? 'Solo ingresos' : 'Solo egresos'} ✕</a>` : ''}${q ? `<a class="chip-b" href="${enlace({ q: '' })}">“${esc(q)}” ✕</a>` : ''}<a class="btn-link" href="#/bancos">Limpiar filtros</a></div>` : '';
+    const chips =
+      fc || ft || q
+        ? `<div class="chips-f">${fc ? `<a class="chip-b" href="${enlace({ cuenta: '' })}">${esc(nombreCuenta(fc))} ✕</a>` : ''}${ft ? `<a class="chip-b" href="${enlace({ tipo: '' })}">${ft === 'ingreso' ? 'Solo ingresos' : 'Solo egresos'} ✕</a>` : ''}${q ? `<a class="chip-b" href="${enlace({ q: '' })}">“${esc(q)}” ✕</a>` : ''}<a class="btn-link" href="#/bancos">Limpiar filtros</a></div>`
+        : '';
 
     view.innerHTML = `
       <div class="title-row"><div><h1>Bancos y flujos</h1><p class="sub">Movimientos ${etiqueta}. Los cobros solo se registran (efectivo o transferencia); no se cobra desde la plataforma.</p></div>
@@ -304,53 +640,136 @@
       <p class="nota-f">Toca una tarjeta para filtrar. Los traspasos entre cuentas mueven el saldo, pero no cuentan como ingreso ni egreso. Todo lo capturado en Administración se puede editar; los cobros se corrigen en su orden.</p>
       <div class="tools"><input class="input" id="f-q" type="search" value="${esc(q)}" placeholder="Buscar por concepto, proveedor o categoría" aria-label="Buscar movimientos"></div>${chips}
       <div class="table-wrap"><table class="respond"><thead><tr><th>Fecha</th><th>Concepto</th><th>Cuenta</th><th>Categoría</th><th class="n">Monto</th><th><span class="sr">Acciones</span></th></tr></thead>
-        <tbody>${lista.map((x) => `<tr${x.servicio ? ` class="link" tabindex="0" data-href="#/orden/${x.servicio}"` : ''}><td class="m-hide num">${fCorta(x.fecha)}</td>
+        <tbody>${
+          lista
+            .map(
+              (
+                x,
+              ) => `<tr${x.servicio ? ` class="link" tabindex="0" data-href="#/orden/${x.servicio}"` : ''}><td class="m-hide num">${fCorta(x.fecha)}</td>
           <td><span class="id">${esc(x.concepto)}${x.editado ? ' <span class="pill info">Editado</span>' : ''}</span><span class="sub">${fCorta(x.fecha)}${x.detalle ? ` · ${esc(x.detalle)}` : ''}${x.metodo ? ` · ${x.metodo === 'efectivo' ? 'efectivo' : x.metodo === 'transferencia' ? 'transferencia' : 'depósito de terminal (anterior)'}` : ''}</span></td>
           <td class="m-line2">${esc(nombreCuenta(x.cuenta))}</td><td class="m-hide">${x.interno ? '<span class="pill">Traspaso</span>' : esc(x.categoria)}</td>
-          <td class="n m-right ${x.interno ? '' : x.tipo === 'ingreso' ? 'v-pos' : 'v-neg'}">${x.tipo === 'ingreso' ? '+' : '−'}${money(x.monto)}</td><td>${acciones(x)}</td></tr>`).join('') || `<tr><td colspan="6"><div class="empty">Sin movimientos ${etiqueta} con este filtro<a class="btn small" href="#/bancos">Limpiar filtros</a></div></td></tr>`}</tbody></table></div>`;
+          <td class="n m-right ${x.interno ? '' : x.tipo === 'ingreso' ? 'v-pos' : 'v-neg'}">${x.tipo === 'ingreso' ? '+' : '−'}${money(x.monto)}</td><td>${acciones(x)}</td></tr>`,
+            )
+            .join('') ||
+          `<tr><td colspan="6"><div class="empty">Sin movimientos ${etiqueta} con este filtro<a class="btn small" href="#/bancos">Limpiar filtros</a></div></td></tr>`
+        }</tbody></table></div>`;
 
     periodoEventos();
     view.querySelector('[data-nuevo]').addEventListener('click', nuevoMovimiento);
     // las filas ligadas a una orden las abre el delegado general (app.js), que ignora los clics en botones
-    view.querySelectorAll('[data-edit]').forEach((b) => b.addEventListener('click', () => { const [o, r] = b.dataset.edit.split(':'); EDITAR[o](r); }));
-    view.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => { const [o, r] = b.dataset.del.split(':'); ELIMINAR[o](r); }));
-    view.querySelector('#f-q').addEventListener('change', (e) => { location.hash = enlace({ q: e.target.value.trim() }); });
-    view.querySelector('[data-export]').addEventListener('click', () => descargar(`movimientos-${rF.desde}-a-${rF.hasta}.csv`, ['Fecha', 'Cuenta', 'Tipo', 'Categoría', 'Concepto', 'Monto'], lista.map((x) => [x.fecha, nombreCuenta(x.cuenta), x.interno ? 'Traspaso' : x.tipo === 'ingreso' ? 'Ingreso' : 'Egreso', x.categoria, x.concepto, x.tipo === 'ingreso' ? x.monto : -x.monto])));
-    tendencia(document.getElementById('chart-flujo'), ds, { label: 'Saldo', values: serie, color: 'var(--c-teal)', format: money, tick: tickMoney });
+    view.querySelectorAll('[data-edit]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const [o, r] = b.dataset.edit.split(':');
+        EDITAR[o](r);
+      }),
+    );
+    view.querySelectorAll('[data-del]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const [o, r] = b.dataset.del.split(':');
+        ELIMINAR[o](r);
+      }),
+    );
+    view.querySelector('#f-q').addEventListener('change', (e) => {
+      location.hash = enlace({ q: e.target.value.trim() });
+    });
+    view.querySelector('[data-export]').addEventListener('click', () =>
+      descargar(
+        `movimientos-${rF.desde}-a-${rF.hasta}.csv`,
+        ['Fecha', 'Cuenta', 'Tipo', 'Categoría', 'Concepto', 'Monto'],
+        lista.map((x) => [
+          x.fecha,
+          nombreCuenta(x.cuenta),
+          x.interno ? 'Traspaso' : x.tipo === 'ingreso' ? 'Ingreso' : 'Egreso',
+          x.categoria,
+          x.concepto,
+          x.tipo === 'ingreso' ? x.monto : -x.monto,
+        ]),
+      ),
+    );
+    tendencia(document.getElementById('chart-flujo'), ds, {
+      label: 'Saldo',
+      values: serie,
+      color: 'var(--c-teal)',
+      format: money,
+      tick: tickMoney,
+    });
   }
 
   // =====================================================================================================
   // EMPLEADOS Y ROLES
+  // Alta, cambio de rol y baja lógica (no se da de baja a quien tiene servicios abiertos), foto de perfil y la
+  // matriz editable de permisos por rol (los requisitos entre permisos se ajustan juntos; ver datos4.js).
   // =====================================================================================================
   const ROL_PERSONAL = { Administración: 'Administración', Asesor: 'Asesor de servicio', Técnico: 'Técnico' };
-  const abiertos = (id) => F.servicios.filter((s) => s.estatus !== 'ENTREGADO' && (s.tecnico === id || s.asesor === id)).length;
+  const abiertos = (id) =>
+    F.servicios.filter((s) => s.estatus !== 'ENTREGADO' && (s.tecnico === id || s.asesor === id)).length;
 
   function nuevoEmpleado() {
     formulario({
-      titulo: 'Nuevo empleado', sub: 'Quedará con el rol que elijas. En esta demostración no se envía la invitación por correo.',
+      titulo: 'Nuevo empleado',
+      sub: 'Quedará con el rol que elijas. En esta demostración no se envía la invitación por correo.',
       campos: [
         { id: 'nombre', label: 'Nombre', req: true, span: 2 },
         { id: 'rol', label: 'Rol', tipo: 'select', valor: 'Técnico', opts: F.ROLES.map((r) => [r, r]) },
         { id: 'tel', label: 'Teléfono (10 dígitos)', req: true, tipo: 'tel', pista: '5512345678' },
-        { id: 'correo', label: 'Correo', req: true, tipo: 'email', span: 2, hint: 'Con este correo entrará al sistema.' },
+        {
+          id: 'correo',
+          label: 'Correo',
+          req: true,
+          tipo: 'email',
+          span: 2,
+          hint: 'Con este correo entrará al sistema.',
+        },
       ],
-      alEscribir: (v, poner) => { const d = v.tel.replace(/\D/g, '').slice(0, 10); if (d !== v.tel) poner('tel', d); },
+      alEscribir: (v, poner) => {
+        const d = v.tel.replace(/\D/g, '').slice(0, 10);
+        if (d !== v.tel) poner('tel', d);
+      },
       alGuardar: (v) => {
-        if (v.tel.length !== 10) { toast('El teléfono debe tener 10 dígitos.'); return; }
-        if (!/^\S+@\S+\.\S+$/.test(v.correo)) { toast('Revisa el correo: no parece válido.'); return; }
-        const id = v.nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `emp${Date.now()}`;
-        if (F.empleados.some((e) => e.id === id)) { toast('Ya hay un empleado con ese nombre.'); return; }
-        F.empleados.push({ id, nombre: v.nombre, rol: v.rol, correo: v.correo.toLowerCase(), tel: v.tel, activo: true, ingreso: HOY });
-        if (v.rol !== 'Administración') F.PERSONAL[id] = { nombre: v.nombre.split(' ')[0], rol: ROL_PERSONAL[v.rol], tono: Math.floor(Math.random() * 360) };
-        toast(`${esc(v.nombre)} se agregó como ${v.rol.toLowerCase()}.`); A.render(false);
+        if (v.tel.length !== 10) {
+          toast('El teléfono debe tener 10 dígitos.');
+          return;
+        }
+        if (!/^\S+@\S+\.\S+$/.test(v.correo)) {
+          toast('Revisa el correo: no parece válido.');
+          return;
+        }
+        const id =
+          v.nombre
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '') || `emp${Date.now()}`;
+        if (F.empleados.some((e) => e.id === id)) {
+          toast('Ya hay un empleado con ese nombre.');
+          return;
+        }
+        F.empleados.push({
+          id,
+          nombre: v.nombre,
+          rol: v.rol,
+          correo: v.correo.toLowerCase(),
+          tel: v.tel,
+          activo: true,
+          ingreso: HOY,
+        });
+        if (v.rol !== 'Administración')
+          F.PERSONAL[id] = {
+            nombre: v.nombre.split(' ')[0],
+            rol: ROL_PERSONAL[v.rol],
+            tono: Math.floor(Math.random() * 360),
+          };
+        toast(`${esc(v.nombre)} se agregó como ${v.rol.toLowerCase()}.`);
+        A.render(false);
       },
     });
   }
 
   function renderEmpleados() {
     setTitle('Empleados y roles');
-    if (!puede.tiene('empleados')) { bloqueado('Empleados y roles'); return; }
-    const E = F.empleados, activos = E.filter((e) => e.activo);
+    const E = F.empleados,
+      activos = E.filter((e) => e.activo);
     const porRol = (r) => activos.filter((e) => e.rol === r).length;
     const celda = (e) => `<tr>
         <td><span class="who">${A.avatar(e.id, e.nombre[0], F.PERSONAL[e.id]?.tono ?? 18, 'grande')}<span><span class="id">${esc(e.nombre)}</span><span class="sub">${esc(e.correo)}</span></span></span></td>
@@ -362,10 +781,14 @@
     // casilla editable por rol y permiso; lo fijo se explica en lugar de solo deshabilitarse
     const casilla = (id, rol) => {
       const on = F.tiene(rol, id);
-      if (F.fijo(rol, id)) return `<span class="perm fijo" title="Administración conserva este permiso para que nadie se quede sin poder corregir los roles">${ICO4.lock}<span>Siempre</span></span>`;
+      if (F.fijo(rol, id))
+        return `<span class="perm fijo" title="Administración conserva este permiso para que nadie se quede sin poder corregir los roles">${ICO4.lock}<span>Siempre</span></span>`;
       return `<label class="perm-chk"><input type="checkbox" data-p="${id}" data-r="${rol}"${on ? ' checked' : ''} aria-label="${esc(rol)}: ${esc(F.nombrePermiso(id))}"><span class="perm-txt">${on ? 'Sí' : 'No'}</span></label>`;
     };
-    const requisito = (id) => (F.REQUIERE[id] ? `<small>requiere: ${F.REQUIERE[id].map((r) => F.nombrePermiso(r).toLowerCase()).join(', ')}</small>` : '');
+    const requisito = (id) =>
+      F.REQUIERE[id]
+        ? `<small>requiere: ${F.REQUIERE[id].map((r) => F.nombrePermiso(r).toLowerCase()).join(', ')}</small>`
+        : '';
 
     view.innerHTML = `
       <div class="title-row"><div><h1>Empleados y roles</h1><p class="sub">Quién trabaja en el taller, qué rol tiene y qué puede hacer cada rol.</p></div>
@@ -381,28 +804,143 @@
         <p class="note">Toca una casilla para dar o quitar el permiso; se aplica en cuanto cambia y queda en auditoría. Si un permiso necesita otro, se ajustan juntos. Para comprobarlo, usa "Ver como" en la barra lateral. En producción el servidor quita de cada respuesta lo que el rol no puede ver, no solo la pantalla.</p></section>`;
 
     view.querySelector('[data-nuevo]').addEventListener('click', nuevoEmpleado);
-    view.querySelector('[data-reset]').addEventListener('click', () => { F.restablecerPermisos(); A.pintarQuien(); toast('Se restablecieron los permisos originales de cada rol.'); A.render(false); });
-    view.querySelectorAll('[data-p]').forEach((chk) => chk.addEventListener('change', () => {
-      const { p, r } = chk.dataset, extra = F.cambiarPermiso(r, p, chk.checked);
-      const nom = (k) => `«${F.nombrePermiso(k)}»`;
-      toast(`${esc(r)}: ${chk.checked ? 'ahora puede' : 'ya no puede'} ${nom(p)}.${extra.length ? ` También ${chk.checked ? 'se activó' : 'se quitó'} ${extra.map(nom).join(', ')}, porque ${chk.checked ? 'es requisito' : 'depende de ese permiso'}.` : ''} Queda en auditoría.`);
-      A.pintarQuien(); A.render(false);
-    }));
-    view.querySelectorAll('[data-foto]').forEach((b) => b.addEventListener('click', () => A.pedirFoto(b.dataset.foto, () => { A.pintarQuien(); A.render(false); })));
-    view.querySelectorAll('[data-sinfoto]').forEach((b) => b.addEventListener('click', () => { A.quitarFoto(b.dataset.sinfoto); A.pintarQuien(); toast('Foto quitada.'); A.render(false); }));
-    view.querySelectorAll('[data-baja]').forEach((b) => b.addEventListener('click', () => {
-      const e = E.find((x) => x.id === b.dataset.baja), n = abiertos(e.id);
-      if (e.activo && n) { toast(`${esc(e.nombre)} tiene ${n} ${n === 1 ? 'servicio abierto' : 'servicios abiertos'}. Reasígnalos antes de darlo de baja.`); return; }
-      e.activo = !e.activo; toast(`${esc(e.nombre)}: ${e.activo ? 'reactivado' : 'de baja'}. Su historial se conserva.`); A.render(false);
-    }));
-    view.querySelectorAll('[data-rol]').forEach((s) => s.addEventListener('change', () => {
-      const e = E.find((x) => x.id === s.dataset.rol), n = abiertos(e.id);
-      if (n && e.rol === 'Técnico') { s.value = e.rol; toast(`${esc(e.nombre)} tiene ${n} ${n === 1 ? 'servicio abierto' : 'servicios abiertos'}. Reasígnalos antes de cambiar su rol.`); return; }
-      e.rol = s.value; if (F.PERSONAL[e.id]) F.PERSONAL[e.id].rol = ROL_PERSONAL[s.value];
-      toast(`${esc(e.nombre)} ahora es ${s.value.toLowerCase()}. El cambio queda en auditoría.`); A.render(false);
-    }));
+    view.querySelector('[data-reset]').addEventListener('click', () => {
+      F.restablecerPermisos();
+      A.pintarQuien();
+      toast('Se restablecieron los permisos originales de cada rol.');
+      A.render(false);
+    });
+    view.querySelectorAll('[data-p]').forEach((chk) =>
+      chk.addEventListener('change', () => {
+        const { p, r } = chk.dataset,
+          extra = F.cambiarPermiso(r, p, chk.checked);
+        const nom = (k) => `«${F.nombrePermiso(k)}»`;
+        toast(
+          `${esc(r)}: ${chk.checked ? 'ahora puede' : 'ya no puede'} ${nom(p)}.${extra.length ? ` También ${chk.checked ? 'se activó' : 'se quitó'} ${extra.map(nom).join(', ')}, porque ${chk.checked ? 'es requisito' : 'depende de ese permiso'}.` : ''} Queda en auditoría.`,
+        );
+        A.pintarQuien();
+        A.render(false);
+      }),
+    );
+    view.querySelectorAll('[data-foto]').forEach((b) =>
+      b.addEventListener('click', () =>
+        A.pedirFoto(b.dataset.foto, () => {
+          A.pintarQuien();
+          A.render(false);
+        }),
+      ),
+    );
+    view.querySelectorAll('[data-sinfoto]').forEach((b) =>
+      b.addEventListener('click', () => {
+        A.quitarFoto(b.dataset.sinfoto);
+        A.pintarQuien();
+        toast('Foto quitada.');
+        A.render(false);
+      }),
+    );
+    view.querySelectorAll('[data-baja]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const e = E.find((x) => x.id === b.dataset.baja),
+          n = abiertos(e.id);
+        if (e.activo && n) {
+          toast(
+            `${esc(e.nombre)} tiene ${n} ${n === 1 ? 'servicio abierto' : 'servicios abiertos'}. Reasígnalos antes de darlo de baja.`,
+          );
+          return;
+        }
+        e.activo = !e.activo;
+        toast(`${esc(e.nombre)}: ${e.activo ? 'reactivado' : 'de baja'}. Su historial se conserva.`);
+        A.render(false);
+      }),
+    );
+    view.querySelectorAll('[data-rol]').forEach((s) =>
+      s.addEventListener('change', () => {
+        const e = E.find((x) => x.id === s.dataset.rol),
+          n = abiertos(e.id);
+        if (n && e.rol === 'Técnico') {
+          s.value = e.rol;
+          toast(
+            `${esc(e.nombre)} tiene ${n} ${n === 1 ? 'servicio abierto' : 'servicios abiertos'}. Reasígnalos antes de cambiar su rol.`,
+          );
+          return;
+        }
+        e.rol = s.value;
+        if (F.PERSONAL[e.id]) F.PERSONAL[e.id].rol = ROL_PERSONAL[s.value];
+        toast(`${esc(e.nombre)} ahora es ${s.value.toLowerCase()}. El cambio queda en auditoría.`);
+        A.render(false);
+      }),
+    );
   }
 
-  A.rutas.balance = renderBalance; A.rutas.bancos = renderBancos; A.rutas.empleados = renderEmpleados;
-  if (['balance', 'bancos', 'empleados'].includes(location.hash.slice(2).split(/[/?]/)[0])) A.render(false);
+  // =====================================================================================================
+  // BITÁCORA DE CAMBIOS (especificación §3.7)
+  // Solo lectura: quién hizo qué, cuándo, qué había y qué quedó. Se filtra por texto o por orden (?q=).
+  // =====================================================================================================
+  // Un valor anterior o nuevo se muestra como pares "campo: valor"; los importes, con formato de dinero.
+  const DINERO = ['monto', 'costo', 'precio', 'total', 'comision', 'tabulado'];
+  const valorTxt = (o) => {
+    if (o == null) return '<span class="dash">—</span>';
+    if (typeof o !== 'object') return esc(o);
+    return (
+      Object.entries(o)
+        .filter(([, v]) => v != null && typeof v !== 'object')
+        .map(([k, v]) => `<span class="bit-kv"><i>${esc(k)}</i> ${esc(DINERO.includes(k) ? money(v) : v)}</span>`)
+        .join('') || '<span class="dash">—</span>'
+    );
+  };
+  function renderBitacora(_, params = new URLSearchParams()) {
+    setTitle('Bitácora de cambios');
+    const q = (params.get('q') || '').trim().toLowerCase();
+    const orden = (a) => F.servicios.find((s) => s.codigo === a.servicio);
+    const lista = F.auditoria.filter(
+      (a) => !q || `${a.accion} ${a.quien} ${a.servicio || ''} ${orden(a)?.orden || ''}`.toLowerCase().includes(q),
+    );
+    view.innerHTML = `
+      <div class="title-row"><div><h1>Bitácora de cambios</h1>
+        <p class="sub">Cada cambio de precio, estatus, pago, gasto o permiso queda aquí con su autor y su hora. No se edita ni se borra.</p></div>
+        <div class="actions"><button class="btn" type="button" data-csv ${lista.length ? '' : 'disabled title="No hay cambios que exportar"'}>Exportar a Excel</button></div></div>
+      <form class="bit-buscar" role="search"><label class="sr" for="bit-q">Buscar en la bitácora</label>
+        <input class="input" id="bit-q" type="search" value="${esc(params.get('q') || '')}" placeholder="Buscar por orden, persona o acción" autocomplete="off">
+        <button class="btn" type="submit">Buscar</button>${q ? '<a class="btn ghost" href="#/bitacora">Quitar filtro</a>' : ''}</form>
+      ${
+        lista.length
+          ? `<div class="table-wrap"><table class="bit-t"><thead><tr><th>Cuándo</th><th>Quién</th><th>Qué cambió</th><th>Antes</th><th>Después</th></tr></thead>
+        <tbody>${lista
+          .map((a) => {
+            const s = orden(a);
+            return `<tr><td class="num">${A.fechaHora(a.fecha)}</td><td>${esc(a.quien)}</td>
+            <td>${esc(a.accion)}${s ? ` <a class="btn-link" href="#/orden/${s.codigo}">orden ${s.orden}</a>` : ''}</td>
+            <td>${valorTxt(a.antes)}</td><td>${valorTxt(a.despues)}</td></tr>`;
+          })
+          .join('')}</tbody></table></div>`
+          : `<div class="empty">${q ? 'Ningún cambio coincide con la búsqueda.' : 'Todavía no hay cambios registrados. Aparecerán aquí en cuanto alguien registre un pago, cambie un estatus o edite un gasto.'}</div>`
+      }`;
+    view.querySelector('.bit-buscar').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = view.querySelector('#bit-q').value.trim();
+      location.hash = v ? `#/bitacora?q=${encodeURIComponent(v)}` : '#/bitacora';
+    });
+    view.querySelector('[data-csv]')?.addEventListener('click', () =>
+      A.descargar(
+        'bitacora-fortaleza-servicar.csv',
+        ['Fecha', 'Quién', 'Acción', 'Orden', 'Antes', 'Después'],
+        lista.map((a) => [
+          a.fecha,
+          a.quien,
+          a.accion,
+          orden(a)?.orden || '',
+          JSON.stringify(a.antes ?? ''),
+          JSON.stringify(a.despues ?? ''),
+        ]),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------
+  // Registro de rutas (el router valida el permiso de cada una)
+  // ---------------------------------------------------------------------------------------------------------------
+  A.registrarRuta('bitacora', renderBitacora, { permiso: 'bitacora', titulo: 'Bitácora de cambios' });
+  A.registrarRuta('balance', renderBalance, { permiso: 'flujos', titulo: 'Balance' });
+  A.registrarRuta('bancos', renderBancos, { permiso: 'flujos', titulo: 'Bancos y flujos' });
+  A.registrarRuta('empleados', renderEmpleados, { permiso: 'empleados', titulo: 'Empleados y roles' });
 })();
