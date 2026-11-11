@@ -22,21 +22,30 @@
 
 **2026-11-11:** el flujo de la orden ya se opera de punta a punta en el prototipo (cotización con tabulados, pagos MercadoPago/BBVA con IVA de la comisión, reversos, técnico, espera de refacción), con guardado en el navegador y sincronía ERP ↔ portal (`js/almacen.js`), bitácora (`#/bitacora`), CSP estricta en `docker/Caddyfile` y emblema 3D en el portal (`js/escena3d.js`, three.js r186 en `prototipo/vendor/three/`). Detalle en `docs/documentacion-tecnica.md`; versión para el taller en `docs/guia-cliente.md`.
 
-**Pendiente de esa sesión (se cortó por límite de uso):** confirmar que Render desplegó bien (el `Caddyfile` no se pudo validar en local); decidir qué hacer con `color/` e `img/`, que están borradas en disco pero no en git; correr `graphify update .`.
+**2026-11-11 (segunda parte):** el prototipo ya cubre lo que la hoja de ruta llama fase 2, salvo la importación del Excel:
+
+- una orden con varios carros (`grupo`), avance calculado de sus folios y un solo enlace de seguimiento; el portal deja elegir vehículo;
+- técnico responsable y técnicos de apoyo por folio;
+- recepción firmada por el técnico (`js/firma.js`: trazos + sello SHA-256, verificado en la orden);
+- estatus `CANCELADO` con motivo;
+- diagnóstico por sistemas (`#/diagnostico/<folio>`), Clientes (`#/clientes`), Configuración (`#/configuracion`) y hoja imprimible de la orden (`js/fase5.js`, `css/fase5.css`);
+- 15 pantallas revisadas a 360 px: sin desborde y con botones de 44 px.
+
+`VERSION` del almacén subió a 2: lo guardado antes en el navegador se descarta solo.
 
 ## 2. Siguiente paso exacto (retomar aquí)
 
-1. **Alinear el prototipo con el modelo de especificación §3** (con datos fijos):
-   - una orden con dos folios y estatus por carro;
-   - varios técnicos por folio;
-   - pantalla de firma del técnico en la recepción (trazos);
-   - pagos con MercadoPago 2.9 % y BBVA 2.1 % más el IVA de la comisión, y la comisión como egreso en Bancos;
-   - catálogo de servicios tabulados en la cotización;
-   - editar o revertir pagos dentro de la orden;
-   - pantalla para consultar la bitácora de cambios (`FS.auditoria`).
-2. Revisar el prototipo a 360 px (Galaxy A11): Balance, Bancos, Empleados, Citas y el panel de notificaciones.
-3. Respuestas del cliente a especificación §6, sobre todo: número de orden, horas tabuladoras, reparto de pagos entre folios, hosting y categorías de gasto.
-4. Después: fase 1 (monorepo, Docker, CI, auth y permisos). Copiar `docs/schema.prisma` a `apps/api/prisma/` y escribir las restricciones de `docs/modelo-de-datos.md` §4.
+1. **Confirmar que Render desplegó bien.** El `Caddyfile` no se pudo validar en local (no hay Docker) y no se conoce la URL del servicio.
+2. **Decidir qué hacer con `color/` e `img/`:** están borradas en disco pero siguen en git; el borrado no se ha incluido en ningún commit.
+3. **Respuestas del cliente a especificación §6.** Las que hoy frenan algo concreto:
+   - reparto de un pago entre los carros de una orden (el prototipo lo anota por carro);
+   - reparto de horas entre varios técnicos (los reportes cuentan al responsable);
+   - texto del contrato PROFECO (la hoja impresa no lleva cláusulas);
+   - mapeo de estatus para importar el Excel;
+   - número de orden, hosting y categorías de gasto.
+4. **Fase 1** (monorepo, Docker, CI, auth y permisos). Copiar `docs/schema.prisma` a `apps/api/prisma/` y escribir las restricciones de `docs/modelo-de-datos.md` §4. Llevar los tres recorridos de prueba (hoy scripts locales fuera del repo) a Playwright.
+
+**Datos de muestra que el taller debe sustituir:** precios del tabulador, plantillas de diagnóstico y datos fiscales (Configuración llega vacía a propósito).
 
 **En espera por decisión del usuario:** recordatorio de servicio por correo (requiere aprobar un proveedor de correo).
 
@@ -66,17 +75,20 @@
   - `js/estados.js`: máquina de estados (catálogo de estatus, transiciones, `avanzar`, `autorizar`, `entregar`). Único lugar donde cambia un estatus; lo usan el ERP y el portal.
   - `js/app.js`: núcleo, dashboard, órdenes, detalle, recepción, notificaciones y router. Las pantallas se registran con `FSApp.registrarRuta(nombre, render, { permiso, titulo })` y el router valida el permiso.
   - `js/fase3.js`: citas, gastos y compras, y reportes.
-  - `js/fase4.js`: balance, bancos y empleados.
+  - `js/fase4.js`: balance, bancos, empleados y bitácora.
+  - `js/firma.js`: firma del técnico (trazos, SVG y sello).
+  - `js/fase5.js`: clientes, diagnóstico, configuración y hoja imprimible.
+  - `js/almacen.js`: guardado en el navegador y sincronía ERP ↔ portal.
   - `css/fase4.css`: secciones del menú, colores del dinero (`.v-pos`, `.v-neg`, `--eg-*`) y Administración.
 - **Inspección visual:**
   - `node ~/.claude/skills/taste-skill/scripts/inspect.mjs --app "<url>" --out .taste-skill/<nombre>`.
   - Corre **una pantalla a la vez**: el usuario canceló una corrida larga.
   - Para pruebas de clic sin Playwright, usar `~/.claude/skills/taste-skill/scripts/lib/cdp.mjs`.
-- **Datos guardados en el navegador:** `fs-permisos`, `fs-foto-<id>`, `fs-tema` y `fs-rol` en `localStorage`.
+- **Datos guardados en el navegador:** `fs-datos` (todo lo capturado), `fs-permisos`, `fs-foto-<id>`, `fs-tema` y `fs-rol` en `localStorage`.
+- **Orden con dos carros para probar:** `#/orden/FS-26-000475` (orden 2829).
 
 ## 4. Notas de entorno
 
 - Python: `L:/Python/python.exe` (tiene graphify). Node v24. Prisma se valida con `npx -y prisma@6.19.0 validate --schema docs/schema.prisma` (requiere `DATABASE_URL` de prueba).
 - Herramientas de diseño: taste-skill en `~/.claude/skills/taste-skill`.
-- El proyecto **no es un repositorio git**: antes de reescribir documentos, respaldar fuera del proyecto.
 - En la herramienta Bash, los heredoc de Python con comillas invertidas fallan. Escribir el script a un archivo del scratchpad y ejecutarlo.

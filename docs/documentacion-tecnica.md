@@ -46,6 +46,7 @@ flowchart TD
   vehiculos["vehiculos.js<br/>catálogo de vehículos"]
   datos["datos.js<br/>CONFIG, servicios, calcular(),<br/>comisionDe(), TABULADOS"]
   estados["estados.js<br/>máquina de estados"]
+  firma["firma.js<br/>firma en trazos y sello"]
   diagrama["diagrama.js<br/>diagrama de daños"]
   datos3["datos3.js<br/>compras, gastos, citas"]
   datos4["datos4.js<br/>cuentas, movimientos,<br/>empleados, permisos"]
@@ -53,12 +54,14 @@ flowchart TD
   app["app.js<br/>núcleo, router, dashboard,<br/>órdenes, detalle, recepción"]
   fase3["fase3.js<br/>citas, gastos y compras, reportes,<br/>formulario modal"]
   fase4["fase4.js<br/>balance, bancos, empleados, bitácora"]
+  fase5["fase5.js<br/>clientes, diagnóstico,<br/>configuración, hoja imprimible"]
   portal["portal.js<br/>portal del cliente"]
   escena["escena3d.js (módulo ES)<br/>emblema 3D"]
   three["vendor/three<br/>three.js r186"]
 
   datos --> estados --> datos3 --> datos4 --> almacen
-  almacen --> app --> fase3 --> fase4
+  almacen --> app --> fase3 --> fase4 --> fase5
+  estados --> firma --> almacen
   graficas --> app
   vehiculos --> app
   diagrama --> app
@@ -66,19 +69,21 @@ flowchart TD
   portal -. "import() diferido" .-> escena -. "import() diferido" .-> three
 ```
 
-El portal carga solo `tema.js`, `datos.js`, `estados.js`, `almacen.js` y `portal.js`: no recibe compras, gastos, cuentas ni empleados.
+El portal carga solo `tema.js`, `datos.js`, `estados.js`, `firma.js`, `almacen.js` y `portal.js`: no recibe compras, gastos, cuentas ni empleados.
 
 | Archivo | Responsabilidad | Publica |
 |---|---|---|
 | `js/datos.js` | Configuración del taller, servicios de muestra y cálculo de utilidad en centavos | `FS.CONFIG`, `FS.servicios`, `FS.calcular`, `FS.comisionDe`, `FS.TABULADOS` |
 | `js/estados.js` | Catálogo de estatus y tabla de transiciones. **Único lugar donde cambia un estatus** | `FS.Estados` |
+| `js/firma.js` | Firma del técnico: captura en lienzo, trazos como enteros con diferencias, SVG y sello SHA-256 | `FS.Firma` |
 | `js/datos3.js` | Compras (derivadas de las refacciones y TOT de cada orden), gastos, citas y recordatorios | `FS.compras`, `FS.gastos`, `FS.citas`, `FS.recordatorios` |
 | `js/datos4.js` | Cuentas, movimientos (derivados), empleados y matriz de permisos | `FS.movimientos()`, `FS.saldoDe()`, `FS.tiene()`, `FS.permisos` |
 | `js/almacen.js` | Persistencia, validación de lo guardado, bitácora y aviso entre pestañas | `FS.guardar`, `FS.reiniciar`, `FS.auditar`, `FS.tokenNuevo`, `FS.alCambiarAlmacen` |
 | `js/app.js` | Router por hash, permisos de ruta, pantallas del taller y captura dentro de la orden | `FSApp.registrarRuta`, `FSApp.render`, `FSApp.toast`, formatos |
 | `js/fase3.js` | Citas, gastos y compras, reportes, formulario modal y exportación a CSV | `FSApp.formulario`, `FSApp.descargar`, `FSApp.nuevaCompra` |
 | `js/fase4.js` | Balance, bancos y flujos, empleados y roles, bitácora de cambios | rutas `balance`, `bancos`, `empleados`, `bitacora` |
-| `js/portal.js` | Portal del cliente: estado, cotización, vehículo, historial y autorización | — |
+| `js/fase5.js` | Clientes, diagnóstico por sistemas, configuración del taller y hoja imprimible de la orden | rutas `clientes`, `diagnostico`, `configuracion`; `FSApp.imprimirOrden` |
+| `js/portal.js` | Portal del cliente: estado de cada carro de la orden, cotización, vehículo, historial y autorización | — |
 | `js/escena3d.js` | Emblema 3D del portal | `montarEmblema()`, `puede3D()` |
 
 ### Router y permisos
@@ -111,9 +116,38 @@ stateDiagram-v2
   EN_REPARACION --> TERMINADO
   TERMINADO --> ENTREGADO: saldo en cero
   ENTREGADO --> [*]
+  RECIBIDO --> CANCELADO: con motivo
+  EN_REPARACION --> CANCELADO: con motivo
+  TERMINADO --> CANCELADO: con motivo
+  CANCELADO --> [*]
 ```
 
-Pendiente respecto a la especificación: el estatus `CANCELADO` y el modelo de una orden con varios folios (el prototipo trabaja un carro por servicio).
+`CANCELADO` se alcanza desde cualquier estatus anterior a `ENTREGADO` (el diagrama muestra tres de esas flechas) y siempre con motivo: `Estados.cancelar()` guarda la fecha, el motivo y el estatus de origen. Un servicio cancelado ya no se edita, pero sus pagos se pueden revertir para devolver un anticipo.
+
+### 3.1 bis Orden, folios y técnicos
+
+Cada elemento de `FS.servicios` es un **folio** (un carro). Los folios de una misma orden comparten `grupo` (el código de la orden) y el enlace de seguimiento; el código del folio es el de la orden más el número del carro (`FS-26-000475-2`).
+
+```mermaid
+flowchart LR
+  O["Orden 2829<br/>grupo FS-26-000475<br/>un enlace de seguimiento"] --> F1["Folio 1 · Jetta<br/>COTIZADO"]
+  O --> F2["Folio 2 · Versa<br/>RECIBIDO"]
+  F1 --> T1["técnico responsable<br/>+ técnicos de apoyo"]
+  F1 --> R1["recepción firmada"]
+  F1 --> D1["diagnóstico"]
+  F1 --> P1["cotización y pagos"]
+```
+
+- La orden **no tiene estatus**: `Estados.resumenOrden(folios)` lo calcula ("1 de 2 carros por autorizar").
+- **Agregar otro carro** abre la recepción con `?orden=<código>`: el cliente y el número de orden vienen de la orden.
+- **Técnicos:** `tecnico` es el responsable y `apoyo` la lista de los demás. Los reportes por técnico siguen contando al responsable; cómo se reparten las horas entre varios es pregunta abierta (§6).
+- **Pagos:** se registran en el folio. La especificación los define por orden, con reparto proporcional entre folios como *propuesta* (§6); hasta que el taller lo confirme, el prototipo no reparte.
+
+### 3.1 ter Recepción firmada y diagnóstico
+
+- **Firma** (`js/firma.js`, especificación §3.3): el lienzo guarda los puntos como enteros, el primero absoluto y los demás como diferencia (`"40,40,18,19,18,1…"`, unos 200 bytes). El sello es el SHA-256 de los trazos, el folio, el técnico y la hora. El detalle vuelve a calcularlo y muestra *firma íntegra* o *firma alterada*. Los trazos solo admiten números (`Firma.valida`), porque se insertan en el atributo `d` de un `<path>`.
+- **Diagnóstico** (`#/diagnostico/<folio>`, M06): plantillas por sistema; cada punto queda como Bien, Atención o Urgente, con nota. Ningún punto empieza marcado y no se guarda hasta marcar todos los de los sistemas elegidos. Las plantillas son de muestra.
+- **Hoja de la orden** (`FSApp.imprimirOrden`): arma la hoja y usa la impresión del navegador (`@media print` en `css/fase5.css`). No lleva costos, proveedores ni utilidad, y solo lleva precios si el rol ve importes. Los datos fiscales salen de **Configuración**; no trae las cláusulas del contrato PROFECO (pregunta abierta 10).
 
 ### 3.2 Qué se captura en cada etapa
 
@@ -285,7 +319,7 @@ No se cargan modelos, texturas ni entornos HDR: toda la geometría se genera en 
 
 ## 8. Cómo se verificó
 
-Se recorrió el flujo en un Chrome real controlado por script, con el ERP y el portal en dos pestañas del mismo navegador, primero sin cabeceras y después con la misma política de contenido del `Caddyfile`. Las 31 comprobaciones pasan en ambos casos:
+Se recorrió el flujo en un Chrome real controlado por script, con el ERP y el portal en dos pestañas del mismo navegador, primero sin cabeceras y después con la misma política de contenido del `Caddyfile`. Son tres recorridos y todos pasan: el flujo de la orden (34 comprobaciones), lo agregado después —carros, firma, apoyo, cancelación, clientes, configuración y hoja— (48) y el diagnóstico a 360 px (11).
 
 | Bloque | Qué se comprobó |
 |---|---|
@@ -295,6 +329,12 @@ Se recorrió el flujo en un Chrome real controlado por script, con el ERP y el p
 | Otros módulos | La liquidación en efectivo entra a Caja; el reverso sale como egreso del banco; la bitácora registra cada paso, incluido el del cliente |
 | Permisos | El técnico no entra a la bitácora ni ve importes en la orden |
 | Persistencia | Al recargar todo sigue igual y la compra sigue enlazada a su renglón; un guardado con forma inválida se ignora |
+| Varios carros | La orden 2829 muestra sus dos carros y su avance; el carro nuevo hereda cliente, número de orden y enlace; el portal deja elegir vehículo |
+| Firma | Sin firma no se guarda; pesa menos de 1 KB; el sello se verifica y una firma manipulada se detecta; un guardado con trazos no numéricos se descarta |
+| Técnicos y cancelación | Se agrega y se quita un técnico de apoyo; no se cancela sin motivo ni un entregado; el cancelado sale de "En piso" |
+| Clientes y configuración | Búsqueda, ficha con sus vehículos, recepción con sus datos; un RFC inválido no se guarda; el técnico no ve importes ni entra a Configuración |
+| Diagnóstico | Ningún punto empieza marcado; el hallazgo llega a la orden, a la bitácora y a la hoja impresa |
+| 360 px | Las 15 pantallas del ERP sin desborde horizontal y con todos los botones de al menos 44 px |
 | Consola | Sin errores, sin aserciones fallidas y sin violaciones de la política de contenido |
 
 Lo que **no** se pudo comprobar en esta máquina:
@@ -328,3 +368,8 @@ Para probar la sincronía, abre el ERP y el portal en **dos pestañas del mismo 
 | `calcular()` en `datos.js` | `packages/shared/src/finance/`, con pruebas sobre las 4 órdenes del Excel |
 | `estados.js` | `domain/` del módulo de órdenes, misma tabla de transiciones |
 | Reloj fijo de la demostración (28 de octubre de 2026) | Hora real en `America/Mexico_City` |
+| Clientes derivados de los servicios, agrupados por teléfono | Entidades `Customer` y `Vehicle` |
+| Pago registrado en el folio | Pago de la orden, repartido entre folios según lo que decida el taller |
+| Hoja con la impresión del navegador | PDF con `@react-pdf/renderer` y las cláusulas PROFECO |
+| Parámetros del negocio de solo lectura | `BranchSetting` editable, con vigencia y auditoría |
+| Sin importación | Importación del Excel (requiere el mapeo de estatus, pregunta abierta 3) |

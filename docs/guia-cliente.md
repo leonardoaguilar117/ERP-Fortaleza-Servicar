@@ -32,11 +32,13 @@ Hay tres tipos de usuario. Administración decide qué puede hacer cada uno en *
 | | Administración | Asesor | Técnico |
 |---|:---:|:---:|:---:|
 | Recibir vehículos y avanzar el estatus | Sí | Sí | Sí |
+| Capturar el diagnóstico | Sí | Sí | Sí |
 | Armar la cotización y ver precios | Sí | Sí | No |
+| Cancelar un servicio | Sí | Sí | No |
 | Registrar pagos y entregar | Sí | Sí | No |
 | Ver costos, proveedores y utilidad | Sí | No | No |
 | Gastos, compras, bancos y balance | Sí | No | No |
-| Empleados, permisos y bitácora | Sí | No | No |
+| Empleados, permisos, bitácora y configuración | Sí | No | No |
 
 El técnico nunca ve dinero: ni precios, ni costos, ni pagos. El asesor ve lo que se le cobra al cliente, pero no cuánto gana el taller.
 
@@ -50,11 +52,19 @@ Botón rojo **Nueva recepción**. Se captura al cliente, el vehículo (marca, mo
 
 El **diagrama de daños** muestra el carro por sus cinco lados. Eliges el tipo de daño (rayón, golpe, estrellado o faltante) y tocas la zona. La plataforma no deja guardar si no marcaste daños o no confirmaste "sin daños": así nadie reclama después un golpe que ya traía.
 
+Al final **firma el técnico que recibe**, con el dedo sobre la pantalla. La firma queda guardada con un sello: si alguien la modificara después, la plataforma lo avisa en la orden.
+
 Al guardar, la orden queda como **Recibido** y se genera el enlace de seguimiento del cliente.
+
+**Si el cliente trae varios carros:** recibe el primero y, dentro de su orden, usa **Agregar otro carro**. Todos quedan en la misma orden, cada uno con su propio avance, y el cliente los ve juntos en un solo enlace.
 
 ### Paso 2 · Diagnóstico
 
-Con **Pasar a diagnóstico** la orden cambia de etapa. En el panel **Personal** asignas al técnico.
+Con **Pasar a diagnóstico** la orden cambia de etapa. En el panel **Personal** asignas al técnico responsable; junto a cada nombre se ve cuántos servicios tiene abiertos. Si trabajan varios en el mismo carro, **Agregar otro técnico** los suma como apoyo.
+
+Con **Capturar diagnóstico** el técnico elige los sistemas que revisó (frenos, suspensión, motor, enfriamiento, eléctrico o llantas) y marca cada punto como **Bien**, **Atención** o **Urgente**, con una nota. Nada viene marcado de antemano. Los hallazgos quedan a la vista en la orden para armar la cotización.
+
+> Los puntos de cada sistema son de ejemplo. Hay que ajustarlos a como revisa tu taller.
 
 ### Paso 3 · Cotización
 
@@ -86,6 +96,14 @@ Con **Pasar a terminado** el cliente ve "Tu vehículo está listo". Puedes **Age
 ### Paso 7 · Pago y entrega
 
 **Registrar pago y entregar** abre la ventana de cobro con el saldo. Eliges cómo pagó y la orden queda **Entregada**.
+
+### Si el servicio no se hace
+
+**Cancelar servicio** pide el motivo (por ejemplo, el cliente no aceptó la cotización). El servicio queda cancelado y a la vista en el historial; no se borra. Si había un anticipo, se devuelve con **Revertir** en sus pagos.
+
+### Imprimir la orden
+
+**Imprimir orden** arma una hoja con los datos del cliente y del vehículo, los daños, el inventario, el diagnóstico, la cotización y la firma del técnico. Se imprime o se guarda como PDF desde el navegador. Los datos del taller (razón social, RFC, domicilio) se capturan una vez en **Administración → Configuración**.
 
 ## 4. El dinero
 
@@ -166,6 +184,8 @@ Dentro de cada orden hay un resumen con sus últimos cambios.
 - **Campana de avisos**: cotizaciones sin respuesta desde hace más de un día, refacciones en espera y vehículos listos que nadie ha recogido.
 - **Citas y recordatorios**: la agenda del taller. Una cita de entrega se marca sola como atendida cuando entregas el vehículo.
 - **Búsqueda**: arriba, por placas, cliente o número de orden. También con la tecla `/`.
+- **Clientes**: cada cliente con sus carros, sus servicios y lo que debe. Desde su ficha se recibe otro vehículo sin volver a escribir sus datos.
+- **Configuración**: los datos del taller y los parámetros con los que se calcula la utilidad (30 % sobre refacciones, $400 por hora, comisiones).
 - **Tres estilos de color**: Rojo, Oscuro y Claro, al pie de la barra lateral.
 
 ## 8. Cómo probarla
@@ -190,9 +210,10 @@ Para que no haya sorpresas, esto es lo que la versión de prueba **no** hace tod
 | El cliente solo ve cambios si abre el portal en el mismo equipo de la prueba | El cliente lo ve desde su propio celular |
 | El código para autorizar es fijo (482913) | Llega por mensaje, dura 5 minutos y admite 5 intentos |
 | Cualquiera puede cambiar de usuario con "Ver como" | Cada persona entra con su correo y contraseña |
-| El contrato PROFECO no se genera | Se genera en PDF con los datos del taller |
+| La orden se imprime sin las cláusulas del contrato PROFECO | El PDF lleva tu contrato registrado |
+| Cada pago se anota en un carro | Un pago de la orden se reparte entre sus carros |
+| No se importa tu Excel | Se cargan tus órdenes anteriores |
 | La fecha está detenida en el 28 de octubre de 2026 | Usa la fecha y la hora reales |
-| Un carro por orden | Una orden puede traer varios carros, cada uno con su estatus |
 
 Fuera del alcance acordado, y por lo tanto no se construirán: inventario, venta de productos, facturación, cobro con terminal desde la plataforma, paquetes de precios y fotos de vehículos.
 
@@ -203,6 +224,8 @@ Hay decisiones que solo el taller puede tomar y que cambian cómo se construye l
 1. **El número de orden**: ¿continúa la numeración actual o empieza una nueva?
 2. **Las horas tabuladoras**: ¿se usan para medir al técnico o solo como referencia?
 3. **Varios carros en una orden**: ¿cómo se reparte un pago entre ellos?
-4. **El tabulador de servicios** con tus precios reales.
+4. **El tabulador de servicios** con tus precios reales, y **los puntos que revisas en cada diagnóstico**.
 5. **Las categorías de gasto** que usas.
 6. **Dónde se va a alojar** el sistema, porque de eso depende el costo mensual.
+7. **El texto de tu contrato PROFECO**, para que salga en la orden impresa.
+8. **Con varios técnicos en un carro**: ¿cómo se reparten las horas entre ellos?

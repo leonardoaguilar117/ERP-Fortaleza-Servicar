@@ -412,19 +412,25 @@ HTML, CSS y JavaScript sin backend, para validar el flujo con el cliente. Se sir
 | Dashboard | `#/dashboard` | Indicadores por periodo, cobrado, flujo por estatus, pendientes; cada elemento lleva a su detalle |
 | Órdenes | `#/ordenes` | Lista y tablero por estatus; filtros por estatus, días en taller y técnico |
 | Detalle | `#/orden/FS-26-000398` | La orden 2752 del Excel con la cascada cobro → utilidad, la cita de entrega y la entrega |
-| Recepción | `#/recepcion` | Catálogo real de vehículos, diagrama de daños por carrocería, inventario sin revisar |
+| Orden con dos carros | `#/orden/FS-26-000475` | Folios con estatus propio, técnicos de apoyo, cancelación con motivo y hoja imprimible |
+| Recepción | `#/recepcion` | Catálogo real de vehículos, diagrama de daños por carrocería, inventario sin revisar y firma del técnico en trazos |
+| Diagnóstico | `#/diagnostico/FS-26-000479` | Plantillas por sistema, resultado por punto y nota |
+| Clientes | `#/clientes` | Cada cliente con sus carros, sus servicios y su saldo |
 | Citas | `#/citas` | Calendario, acciones pendientes, entrega ligada al folio |
 | Gastos y compras | `#/compras` | Compras de las órdenes, gastos, proveedores; todo editable |
 | Reportes | `#/reportes` | Rentabilidad por orden, técnico, proveedor y gastos |
 | Balance | `#/balance` | Ingresos, egresos, flujo, situación a hoy y resultado por periodo |
 | Bancos y flujos | `#/bancos` | Cuentas, movimientos, traspasos; editar y anular |
 | Empleados y roles | `#/empleados` | Equipo, foto de perfil y matriz de permisos editable |
+| Bitácora | `#/bitacora` | Cada cambio con autor, hora, valor anterior y nuevo |
+| Configuración | `#/configuracion` | Datos del taller para la orden impresa y parámetros del negocio |
 | Portal | `portal.html#k7Qw2mZ9pL4xT8vR` | Estatus, cotización sin costos internos y autorización con código `482913` |
 
 - **Notificaciones:** se abren con la campana de la cabecera.
 - **"Ver como":** cambia entre Administración, Asesor y Técnico para mostrar los permisos aplicados.
 - **Simplificaciones:**
-  - cada orden tiene un solo folio;
+  - los pagos se anotan en cada folio; el reparto de un pago entre los carros de una orden espera la respuesta del taller (§6);
+  - la orden se imprime desde el navegador, sin las cláusulas PROFECO;
   - las 4 órdenes del Excel usan su fórmula original para validar las cifras;
-  - los permisos, las fotos y los cambios se guardan solo en el navegador;
+  - los permisos, las fotos y todo lo capturado se guardan solo en el navegador;
   - los datos son de muestra; las 4 órdenes del Excel (`js/datos.js`) conservan sus montos, con cliente, placas y VIN ficticios.
