@@ -128,9 +128,11 @@
       pct = s.estatus === 'ENTREGADO' ? 100 : Math.max(6, (i / 4) * 100),
       cls = NOW[s.estatus][2];
     return `<section class="p-hero" aria-labelledby="h1">
-      <p class="hi">Hola ${esc(s.cliente.nombre.split(' ')[0])}</p>
-      <h1 id="h1">${esc(s.vehiculo.marca)} ${esc(s.vehiculo.modelo)} ${esc(s.vehiculo.anio)}</h1>
-      <p class="veh">Placas ${esc(s.vehiculo.placas)} · orden ${esc(s.orden)}</p>
+      <div class="p-hero-top"><div>
+        <p class="hi">Hola ${esc(s.cliente.nombre.split(' ')[0])}</p>
+        <h1 id="h1">${esc(s.vehiculo.marca)} ${esc(s.vehiculo.modelo)} ${esc(s.vehiculo.anio)}</h1>
+        <p class="veh">Placas ${esc(s.vehiculo.placas)} · orden ${esc(s.orden)}</p>
+      </div><div id="emblema-sitio"></div></div>
       <span class="p-pill ${cls}">${PILL[s.estatus]}</span>
       <div class="p-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Avance del servicio"><i style="--w:${pct}%"></i></div>
       <div class="p-steps" aria-hidden="true"><span>Recibido</span><span>Reparación</span><span>Listo</span></div>
@@ -197,6 +199,41 @@
     </section>`;
   }
 
+  // ---------------------------------------------------------------------------------------------------------------
+  // Emblema del servicio: el escudo con un anillo que marca el avance
+  // El contenedor se crea una sola vez y se vuelve a colocar en cada pintado, así el lienzo 3D no se reinicia.
+  // Arranca con un SVG estático (escudo y arco de avance); js/escena3d.js lo sustituye por la versión 3D solo en
+  // equipos que pueden con ella. El dato ya lo anuncia la barra de progreso: el emblema es decorativo.
+  // ---------------------------------------------------------------------------------------------------------------
+  const avance = () => (s.estatus === 'ENTREGADO' ? 1 : IDX[s.estatus] / 4);
+  const R_ARCO = 41,
+    LARGO = 2 * Math.PI * R_ARCO;
+  const emblema = document.createElement('div');
+  emblema.className = 'p-emblema';
+  emblema.setAttribute('aria-hidden', 'true');
+  emblema.innerHTML = `<svg viewBox="0 0 96 96" fill="none">
+    <circle class="pista" cx="48" cy="48" r="${R_ARCO}" stroke-width="4"/>
+    <circle class="arco" cx="48" cy="48" r="${R_ARCO}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${LARGO}" transform="rotate(-90 48 48)"/>
+    <g transform="translate(29 26) scale(1.46)"><path class="escudo" d="M13 1 24.5 5v9.2c0 7-4.9 12.6-11.5 14.8C6.4 26.8 1.5 21.2 1.5 14.2V5Z"/><path class="efe" d="M9 8.5h8.6v2.8h-5.6v2.6h4.8v2.8h-4.8v5.8H9Z"/></g></svg>`;
+  let emblema3d = null,
+    emblemaPedido = false;
+  function colocarEmblema(festejo = false) {
+    document.getElementById('emblema-sitio')?.replaceWith(emblema);
+    emblema.querySelector('.arco').style.strokeDashoffset = LARGO * (1 - avance());
+    emblema3d?.actualizar({ avance: avance(), festejo });
+    if (emblemaPedido) return;
+    emblemaPedido = true;
+    // Se pide después del primer pintado: el portal nunca espera a three.js para mostrar el estado del vehículo.
+    const pedir = () =>
+      import('./escena3d.js')
+        .then((m) => m.montarEmblema(emblema, { avance: avance() }))
+        .then((api) => {
+          emblema3d = api;
+        })
+        .catch(() => {});
+    'requestIdleCallback' in window ? requestIdleCallback(pedir, { timeout: 1500 }) : setTimeout(pedir, 300);
+  }
+
   const VISTAS = { est: vistaEstado, cot: vistaCotizacion, veh: vistaVehiculo, his: vistaHistorial };
 
   function pintarTab(anima = true) {
@@ -224,7 +261,7 @@
     }
   }
 
-  function render() {
+  function render(festejo = false) {
     root.innerHTML = `<div class="p-grid">
       <aside class="p-side">${hero()}<a class="wa" href="${wa}?text=${encodeURIComponent(`Hola, tengo una duda sobre mi ${s.vehiculo.modelo} (orden ${s.orden}).`)}" target="_blank" rel="noopener">
         <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2.5 13.5 3.3 11A5.5 5.5 0 1 1 5 12.7Z"/></svg>Tengo dudas: escribir al taller</a></aside>
@@ -253,6 +290,7 @@
     requestAnimationFrame(() => ubicar(false));
     addEventListener('resize', () => ubicar(false));
     pintarTab(false);
+    colocarEmblema(festejo);
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -322,7 +360,7 @@
     autorizadoAhora = true;
     sheet.classList.remove('open');
     tab = 'cot';
-    render();
+    render(true); // el emblema da una vuelta: la autorización quedó registrada
   }
   document.getElementById('aviso-link').addEventListener('click', (e) => {
     e.preventDefault();
