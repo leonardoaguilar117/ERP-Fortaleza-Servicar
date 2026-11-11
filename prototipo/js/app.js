@@ -475,6 +475,23 @@
   };
   const MARCA_CORTA = { Volkswagen: 'VW', 'Mercedes-Benz': 'Mercedes' };
   const vehiculoTxt = (veh) => `${MARCA_CORTA[veh.marca] || veh.marca} ${veh.modelo} ${veh.anio}`;
+  // Cada servicio es un folio (un carro). Los folios de una misma orden comparten `grupo`, el código de la orden.
+  const grupoDe = (s) => s.grupo || s.codigo;
+  const foliosDe = (s) =>
+    servicios
+      .filter((x) => grupoDe(x) === grupoDe(s))
+      .sort((a, b) => a.codigo.length - b.codigo.length || a.codigo.localeCompare(b.codigo));
+  // Un folio puede tener varios técnicos: el responsable (`tecnico`) y los de apoyo (`apoyo`).
+  const esDe = (s, id) => s.tecnico === id || (s.apoyo || []).includes(id);
+  const tecnicosActivos = () => (window.FS.empleados || []).filter((e) => e.activo && e.rol === 'Técnico');
+  const cargaDe = (id) => servicios.filter((x) => Estados.abierto(x) && esDe(x, id)).length;
+  const opcionTecnico = (e) => {
+    const n = cargaDe(e.id);
+    return [
+      e.id,
+      n ? `${e.nombre} · ${n} ${n === 1 ? 'servicio abierto' : 'servicios abiertos'}` : `${e.nombre} · libre`,
+    ];
+  };
 
   // promedio de días en taller de lo entregado en octubre (mínimo 1 día, como el Excel)
   const entregadosOct = () => servicios.filter((s) => s.estatus === 'ENTREGADO' && s.entrega.startsWith('2026-10'));
@@ -1198,7 +1215,7 @@
   // =================================================================================================================
   const FILTROS = {
     todos: { label: 'Todos', fn: () => true },
-    piso: { label: 'En piso', fn: (s) => s.estatus !== 'ENTREGADO' },
+    piso: { label: 'En piso', fn: (s) => Estados.abierto(s) },
     autorizar: { label: 'Por autorizar', fn: (s) => s.estatus === 'COTIZADO' },
     reparacion: {
       label: 'En reparación',
@@ -1210,7 +1227,7 @@
     demorados: {
       label: `Más de ${UMBRAL_DIAS} días en taller`,
       oculto: true,
-      fn: (s) => s.estatus !== 'ENTREGADO' && diasEnTaller(s) >= UMBRAL_DIAS,
+      fn: (s) => Estados.abierto(s) && diasEnTaller(s) >= UMBRAL_DIAS,
     },
   };
   Object.entries(ESTATUS).forEach(([k, e]) => {
@@ -1225,7 +1242,7 @@
     FILTROS[`d_${a}`] = {
       label: `En piso: ${l}`,
       oculto: true,
-      fn: (s) => s.estatus !== 'ENTREGADO' && diasEnTaller(s) >= a && diasEnTaller(s) <= b,
+      fn: (s) => Estados.abierto(s) && diasEnTaller(s) >= a && diasEnTaller(s) <= b,
     };
   });
   let vista = 'lista';
@@ -1240,7 +1257,7 @@
     const lista = (t) => {
       const hits = t.trim() ? new Set(buscar(t, Infinity)) : null;
       return servicios
-        .filter((s) => FILTROS[f].fn(s) && (!tec || s.tecnico === tec) && (!hits || hits.has(s)))
+        .filter((s) => FILTROS[f].fn(s) && (!tec || esDe(s, tec)) && (!hits || hits.has(s)))
         .sort((a, b) => new Date(b.ingreso) - new Date(a.ingreso));
     };
     const fila = (s, ts) => `
@@ -1411,7 +1428,7 @@
       ${fila('Utilidad de refacciones', k.utilidadRef, 'res', '', `<small>${CONFIG.margenRefacciones * 100} % del costo</small>`)}
       ${fila('Utilidad de mano de obra', k.utilidadMO, 'res', '', `<small>${dec(k.horasMO)} h a ${money(CONFIG.tarifaHoraMO)}</small>`)}
       ${fila('Utilidad', k.utilidad, 'res total')}
-      <p class="note">${estimada ? 'Estimada: supone que el saldo se cobra en efectivo. ' : ''}Fórmulas del Excel del taller: utilidad de mano de obra = venta neta − refacciones − TOT − utilidad de refacciones. El margen y la tarifa se cambian en Configuración.</p>
+      <p class="note">${estimada ? 'Estimada: supone que el saldo se cobra en efectivo. ' : ''}Fórmulas del Excel del taller: utilidad de mano de obra = venta neta − refacciones − TOT − utilidad de refacciones. El margen y la tarifa se consultan en Configuración.</p>
     </div>`;
   }
 
@@ -1445,7 +1462,7 @@
       importes = puede.importes(),
       costos = puede.costos(),
       e = ESTATUS[s.estatus];
-    const hermanos = servicios.filter((x) => x.orden === s.orden && x.codigo !== s.codigo);
+    const folios = foliosDe(s);
     const vinOk = s.vehiculo.vin && VIN_VALIDO.test(s.vehiculo.vin);
     const cita = citaEntrega(s)[0];
 
@@ -1463,14 +1480,29 @@
     else if (destino && tiene('estatus'))
       primaria = boton('avanzar', `Pasar a ${PASOS[ESTATUS[destino].paso].toLowerCase()}`);
     // Un botón deshabilitado siempre dice qué falta: no se cotiza sin trabajos.
-    const falta = s.estatus === 'EN_DIAGNOSTICO' && !s.trabajos.length ? 'agrega al menos un trabajo a la cotización' : '';
+    const falta =
+      s.estatus === 'EN_DIAGNOSTICO' && !s.trabajos.length ? 'agrega al menos un trabajo a la cotización' : '';
     if (falta && primaria) primaria = primaria.replace('<button', '<button disabled aria-describedby="falta-p"');
     const editable = Estados.abierto(s);
     const cotizable = ['EN_DIAGNOSTICO', 'COTIZADO'].includes(s.estatus) && tiene('cotizar');
-    const cobrable = editable && importes && tiene('pagos');
+    // Un servicio cancelado ya no se edita, pero sus pagos sí se pueden revertir (para devolver un anticipo).
+    const cobrable = (editable || s.estatus === 'CANCELADO') && importes && tiene('pagos');
+    const asignable = editable && tiene('estatus');
     const secundarias = [
       s.estatus === 'EN_REPARACION' && tiene('estatus') ? ['espera', 'Esperar refacción'] : null,
+      tiene('recepcion') && folios.some(Estados.abierto) ? ['otrocarro', 'Agregar otro carro'] : null,
+      editable && tiene('cotizar') ? ['cancelar', 'Cancelar servicio'] : null,
     ].filter(Boolean);
+    const vivos = folios.filter((f) => f.estatus !== 'CANCELADO'),
+      totalOrden = vivos.reduce((t, f) => t + f.calc.total, 0),
+      saldoOrden = vivos.reduce((t, f) => t + f.calc.saldo, 0);
+    const tira =
+      folios.length > 1
+        ? `<nav class="folios" aria-label="Carros de la orden ${s.orden}">
+        <p class="folios-cap"><b>Orden ${s.orden}</b> · ${Estados.resumenOrden(folios)}${importes && totalOrden ? ` · total ${money(totalOrden)} · por cobrar ${money(saldoOrden)}` : ''}</p>
+        <div class="folios-l">${folios.map((f, i) => `<a class="folio${f === s ? ' on' : ''}" href="#/orden/${f.codigo}"${f === s ? ' aria-current="page"' : ''}><span class="t">Carro ${i + 1} · ${esc(vehiculoTxt(f.vehiculo))}</span><span class="sub">${esc(f.vehiculo.placas)}</span>${pill(f.estatus)}</a>`).join('')}</div></nav>`
+        : '';
+    const rec = s.recepcion;
     const agendar =
       s.estatus === 'TERMINADO' && !cita && tiene('citas')
         ? `<button class="btn" type="button" data-act="agendar">${ICO.cal}Agendar entrega</button>`
@@ -1480,19 +1512,24 @@
       <div class="detail-head">
         <div>
           <div class="crumbs"><a href="#/ordenes">Órdenes</a><span aria-hidden="true" class="dash">/</span><h1>Orden ${s.orden}</h1><span class="chip mono" title="Identificador único del servicio">${s.codigo}</span>${pill(s.estatus)}</div>
-          <p class="sub">${esc(s.cliente.nombre)} · ingresó ${fechaHora(s.ingreso)}${s.entrega ? ` · entregado ${fechaHora(s.entrega)} (${Math.max(1, diasCal(s.ingreso, s.entrega))} días en taller)` : ''}${cita ? ` · <a class="btn-link" href="#/citas">cita de entrega: ${fechaCita(cita)} (${cita.estatus.toLowerCase()})</a>` : ''}${hermanos.length ? ` · esta orden tiene otro servicio: <a class="btn-link" href="#/orden/${hermanos[0].codigo}">${hermanos[0].codigo}</a>` : ''}</p>
+          <p class="sub">${esc(s.cliente.nombre)} · ingresó ${fechaHora(s.ingreso)}${s.entrega ? ` · entregado ${fechaHora(s.entrega)} (${Math.max(1, diasCal(s.ingreso, s.entrega))} días en taller)` : ''}${cita ? ` · <a class="btn-link" href="#/citas">cita de entrega: ${fechaCita(cita)} (${cita.estatus.toLowerCase()})</a>` : ''}</p>
         </div>
         <div class="actions detail-actions">
           ${agendar}
           ${secundarias.map(([a, t]) => `<button class="btn" type="button" data-act="${a}">${t}</button>`).join('')}
           <button class="btn" type="button" data-act="seguimiento">Enviar seguimiento</button>
-          <button class="btn" type="button" data-act="profeco">Formato PROFECO</button>
+          <button class="btn" type="button" data-act="profeco">Imprimir orden</button>
           ${primaria}
           ${falta && primaria ? `<p class="falta-p" id="falta-p">Para cotizar, ${falta}.</p>` : ''}
         </div>
       </div>
-      <p class="steps-cap">Paso ${e.paso + 1} de ${PASOS.length}: ${PASOS[e.paso]}</p>
-      <ol class="steps" aria-label="Avance del servicio">${PASOS.map((t, i) => `<li class="${i < e.paso ? 'done' : i === e.paso ? 'now' : ''}"${i === e.paso ? ' aria-current="step"' : ''}><span>${t}</span></li>`).join('')}</ol>
+      ${tira}
+      ${
+        s.estatus === 'CANCELADO'
+          ? `<div class="aviso-cancel" role="status"><b>Servicio cancelado</b><span>${fechaHora(s.cancelado.fecha)} · estaba en «${Estados.etiqueta(s.cancelado.desde)}» · Motivo: ${esc(s.cancelado.motivo)}</span></div>`
+          : `<p class="steps-cap">Paso ${e.paso + 1} de ${PASOS.length}: ${PASOS[e.paso]}</p>
+      <ol class="steps" aria-label="Avance del servicio">${PASOS.map((t, i) => `<li class="${i < e.paso ? 'done' : i === e.paso ? 'now' : ''}"${i === e.paso ? ' aria-current="step"' : ''}><span>${t}</span></li>`).join('')}</ol>`
+      }
       <dl class="facts">
         <div><dt>Vehículo</dt><dd>${esc(vehiculoTxt(s.vehiculo))}${s.vehiculo.version ? ` · ${esc(s.vehiculo.version)}` : ''}</dd></div>
         <div><dt>Placas · VIN</dt><dd><span>${esc(s.vehiculo.placas)}</span> · <span class="mono">${s.vehiculo.vin ? esc(s.vehiculo.vin) : '—'}</span></dd>${s.vehiculo.vin && !vinOk ? `<dd class="warn">El VIN tiene ${s.vehiculo.vin.length} caracteres; deben ser 17. Verificar en la tarjeta de circulación.</dd>` : ''}</div>
@@ -1502,6 +1539,7 @@
       <div class="detail-grid">
         <div>
           ${s.falla ? `<div class="sec-title"><h2>Falla reportada por el cliente</h2></div><p style="margin-bottom:8px">${esc(s.falla)}</p>` : ''}
+          ${window.FSApp.resumenDiagnostico?.(s, editable && tiene('estatus')) || ''}
           ${s.estatus === 'ESPERANDO_REFACCION' ? `<div class="finding" style="background:var(--pill-warning-bg);color:var(--pill-warning-ink);margin:8px 0"><p>${esc(s.espera)}</p></div>` : ''}
           <div class="sec-title"><h2>${s.estatus === 'COTIZADO' ? 'Trabajos cotizados' : ['RECIBIDO', 'EN_DIAGNOSTICO'].includes(s.estatus) ? 'Cotización' : 'Trabajos autorizados'}</h2><span class="meta">${s.trabajos.length ? `${s.trabajos.length} ${s.trabajos.length === 1 ? 'trabajo' : 'trabajos'}` : ''}</span>${cotizable ? `<button class="btn small" type="button" data-act="trabajo">Agregar trabajo</button>` : ''}</div>
           ${
@@ -1531,17 +1569,31 @@
           ${costos && k.total ? `<section class="panel"><header><h2>Del cobro a la utilidad</h2></header>${cascada(s)}</section>` : ''}
           ${
             importes && k.total
-              ? `<section class="panel"><header><h2>Pagos</h2><span class="meta">${k.saldo > 0 ? `saldo ${money(k.saldo)}` : 'liquidado'}</span></header>
+              ? `<section class="panel"><header><h2>Pagos</h2><span class="meta">${s.estatus === 'CANCELADO' ? 'cancelado' : k.saldo > 0 ? `saldo ${money(k.saldo)}` : 'liquidado'}</span></header>
             <div class="rows">${s.pagos.map(([f, met, v, com, concepto, x], i) => `<div class="row pago-r${x?.revertido || v < 0 ? ' anulado' : ''}"><span>${esc(concepto)}<span class="sub">${fecha(f)} · ${esc(CONFIG.metodos[met]?.nombre || met)}${costos && com ? ` · comisión ${money(Math.abs(com))}` : ''}${x?.revertido ? ' · revertido' : ''}</span></span><span class="n">${money(v)}</span>${cobrable && v > 0 && !x?.revertido ? `<button class="btn small ghost" type="button" data-act="revertir" data-i="${i}" aria-label="Revertir el pago ${esc(concepto)}">Revertir</button>` : ''}</div>`).join('') || '<div class="empty">Sin pagos todavía.</div>'}
-            ${k.saldo > 0 ? `<div class="row" style="justify-content:space-between;font-weight:600"><span>Por cobrar</span><span class="n">${money(k.saldo)}</span></div>` : ''}
-            ${cobrable && k.saldo > 0 && s.estatus !== 'TERMINADO' ? `<div class="row"><button class="btn small" type="button" data-act="pago">Registrar anticipo</button></div>` : ''}</div></section>`
+            ${editable && k.saldo > 0 ? `<div class="row" style="justify-content:space-between;font-weight:600"><span>Por cobrar</span><span class="n">${money(k.saldo)}</span></div>` : ''}
+            ${editable && cobrable && k.saldo > 0 && s.estatus !== 'TERMINADO' ? `<div class="row"><button class="btn small" type="button" data-act="pago">Registrar anticipo</button></div>` : ''}</div></section>`
               : ''
           }
           ${!importes ? `<div class="locked"><b>Importes ocultos para el rol Técnico</b><span>Precios, costos y pagos solo los ven Administración y el asesor. Asignado a ${s.tecnico ? PERSONAL[s.tecnico].nombre : 'nadie todavía'}.</span></div>` : ''}
           ${importes && !costos && k.total ? `<div class="locked"><b>Costos y utilidad: solo Administración</b><span>El asesor ve precios y pagos, no costos de refacciones ni utilidad.</span></div>` : ''}
-          <section class="panel"><header><h2>Personal</h2>${editable && tiene('estatus') ? `<button class="btn small" type="button" data-act="tecnico">${s.tecnico ? 'Cambiar técnico' : 'Asignar técnico'}</button>` : ''}</header><div class="rows">
-            <div class="row" style="justify-content:space-between"><span style="color:var(--muted)">Asesor</span>${persona(s.asesor)}</div>
-            <div class="row" style="justify-content:space-between"><span style="color:var(--muted)">Técnico</span>${persona(s.tecnico)}</div></div></section>
+          <section class="panel"><header><h2>Personal</h2>${asignable ? `<button class="btn small" type="button" data-act="tecnico">${s.tecnico ? 'Cambiar técnico' : 'Asignar técnico'}</button>` : ''}</header><div class="rows">
+            <div class="row per-r"><span class="k">Asesor</span>${persona(s.asesor)}</div>
+            <div class="row per-r"><span class="k">${(s.apoyo || []).length ? 'Técnico responsable' : 'Técnico'}</span>${persona(s.tecnico)}</div>
+            ${(s.apoyo || []).map((id, i) => `<div class="row per-r"><span class="k">Apoyo</span><span class="per-v">${persona(id)}${asignable ? `<button class="btn small ghost" type="button" data-act="quitarapoyo" data-i="${i}" aria-label="Quitar a ${esc(PERSONAL[id]?.nombre || 'técnico')} de este servicio">Quitar</button>` : ''}</span></div>`).join('')}
+            ${asignable && s.tecnico ? `<div class="row"><button class="btn small" type="button" data-act="apoyo">Agregar otro técnico</button></div>` : ''}</div></section>
+          ${
+            rec
+              ? `<section class="panel"><header><h2>Recepción</h2><span class="meta" id="sello-est">${rec.hash ? 'verificando firma' : 'firma sin sello'}</span></header>
+            <div class="firma-caja">${window.FS.Firma.svg(rec.trazos, `Firma de ${esc(PERSONAL[rec.tecnico]?.nombre || 'quien recibió')}`)}</div>
+            <div class="rows">
+              <div class="row per-r"><span class="k">Recibió</span>${persona(rec.tecnico)}</div>
+              <div class="row per-r"><span class="k">Fecha</span><span>${fechaHora(rec.hora)}</span></div>
+              ${s.combustible ? `<div class="row per-r"><span class="k">Gasolina</span><span>${esc(s.combustible)}</span></div>` : ''}
+              ${rec.hash ? `<div class="row per-r"><span class="k">Sello</span><span class="mono" title="SHA-256 de los trazos, el folio, el técnico y la hora">${rec.hash.slice(0, 12)}…</span></div>` : ''}
+            </div></section>`
+              : ''
+          }
           ${tiene('bitacora') ? bitacoraDe(s) : ''}
         </aside>
       </div>`;
@@ -1550,6 +1602,15 @@
     view
       .querySelectorAll('[data-act]')
       .forEach((b) => b.addEventListener('click', () => ACCIONES_DETALLE[b.dataset.act]?.(s, +b.dataset.i)));
+
+    // La firma se vuelve a sellar y se compara con el sello guardado: si alguien tocó los trazos, no coincide.
+    if (rec?.hash)
+      window.FS.Firma.sellar(rec.trazos, s.codigo, rec.tecnico, rec.hora).then((h) => {
+        const el = view.querySelector('#sello-est');
+        if (!el) return;
+        el.textContent = h == null ? 'sello sin verificar' : h === rec.hash ? 'firma íntegra' : 'firma alterada';
+        el.classList.toggle('v-neg', h != null && h !== rec.hash);
+      });
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -1718,10 +1779,10 @@
   }
 
   function asignarTecnico(s) {
-    const tecnicos = (window.FS.empleados || []).filter((e) => e.activo && e.rol === 'Técnico');
+    const tecnicos = tecnicosActivos();
     window.FSApp.formulario({
-      titulo: s.tecnico ? 'Cambiar técnico' : 'Asignar técnico',
-      sub: `Orden ${s.orden} · ${esc(vehiculoTxt(s.vehiculo))}.`,
+      titulo: s.tecnico ? 'Cambiar técnico responsable' : 'Asignar técnico',
+      sub: `Orden ${s.orden} · ${esc(vehiculoTxt(s.vehiculo))}. Junto a cada técnico va su carga de trabajo.`,
       campos: [
         {
           id: 'tecnico',
@@ -1729,7 +1790,7 @@
           tipo: 'select',
           span: 2,
           valor: s.tecnico || tecnicos[0]?.id,
-          opts: tecnicos.map((e) => [e.id, e.nombre]),
+          opts: tecnicos.map(opcionTecnico),
         },
       ],
       guardar: 'Asignar',
@@ -1737,6 +1798,7 @@
         if (!v.tecnico || v.tecnico === s.tecnico) return;
         const antes = s.tecnico;
         s.tecnico = v.tecnico;
+        if (s.apoyo) s.apoyo = s.apoyo.filter((x) => x !== v.tecnico); // el de apoyo que pasa a responsable
         // Un empleado dado de alta en la demostración aún no está en PERSONAL: se agrega para pintar su avatar.
         const e = tecnicos.find((x) => x.id === v.tecnico);
         PERSONAL[v.tecnico] = PERSONAL[v.tecnico] || { nombre: e.nombre, rol: 'Técnico', tono: 200 };
@@ -1746,12 +1808,85 @@
     });
   }
 
+  // Varios técnicos por folio (especificación §3.3): el responsable y los de apoyo. Cada alta o baja va a bitácora.
+  function agregarApoyo(s) {
+    const libres = tecnicosActivos().filter((e) => !esDe(s, e.id));
+    if (!libres.length) {
+      toast(
+        'Todos los técnicos activos ya están en este servicio. Para sumar a alguien más, dalo de alta en Empleados y roles.',
+      );
+      return;
+    }
+    window.FSApp.formulario({
+      titulo: 'Agregar otro técnico',
+      sub: `${esc(PERSONAL[s.tecnico]?.nombre || 'El técnico actual')} sigue como responsable de la orden ${s.orden}; quien agregues queda como apoyo.`,
+      campos: [
+        {
+          id: 'tecnico',
+          label: 'Técnico de apoyo',
+          tipo: 'select',
+          span: 2,
+          valor: libres[0].id,
+          opts: libres.map(opcionTecnico),
+        },
+      ],
+      guardar: 'Agregar',
+      alGuardar: (v) => {
+        const e = libres.find((x) => x.id === v.tecnico);
+        if (!e) return;
+        s.apoyo = [...(s.apoyo || []), e.id];
+        PERSONAL[e.id] = PERSONAL[e.id] || { nombre: e.nombre, rol: 'Técnico', tono: 200 };
+        anotar(s, `Agregó a ${e.nombre} como técnico de apoyo`, null, { apoyo: e.id });
+        render(false);
+        resaltar('.per-r');
+      },
+    });
+  }
+  function quitarApoyo(s, i) {
+    const id = (s.apoyo || [])[i];
+    if (!id) return;
+    s.apoyo = s.apoyo.filter((_, k) => k !== i);
+    anotar(s, `Quitó a ${PERSONAL[id]?.nombre || id} como técnico de apoyo`, { apoyo: id }, null);
+    toast(
+      `${esc(PERSONAL[id]?.nombre || 'El técnico')} ya no está en la orden ${s.orden}. El cambio quedó en la bitácora.`,
+    );
+    render(false);
+  }
+
+  // Cancelar (especificación §3.2): cualquier estatus antes de Entregado, siempre con motivo. No se borra nada.
+  function cancelarServicio(s) {
+    window.FSApp.formulario({
+      titulo: 'Cancelar servicio',
+      sub: `Orden ${s.orden} · ${esc(vehiculoTxt(s.vehiculo))}. Queda cancelado y se conserva en el historial; no se puede reabrir.${s.calc.pagado > 0 ? ` Tiene ${money(s.calc.pagado)} cobrados: si se le devuelven al cliente, revierte cada pago en el panel Pagos.` : ''}`,
+      campos: [
+        { id: 'motivo', label: 'Motivo', req: true, span: 2, pista: 'Por ejemplo: el cliente no aceptó la cotización' },
+      ],
+      guardar: 'Confirmar cancelación',
+      alGuardar: (v) => {
+        const de = s.estatus;
+        Estados.cancelar(s, CONFIG.ahora, v.motivo);
+        citaEntrega(s).forEach((x) => {
+          x.estatus = 'Cancelada';
+        });
+        anotar(s, 'Canceló el servicio', { estatus: de }, { estatus: 'CANCELADO', motivo: v.motivo });
+        toast(`Orden ${s.orden}: servicio cancelado. El motivo quedó en la bitácora.`);
+        render();
+      },
+    });
+  }
+
   function esperarRefaccion(s) {
     window.FSApp.formulario({
       titulo: 'Esperar refacción',
       sub: 'La reparación se detiene hasta que llegue la pieza. El cliente lo ve en su enlace de seguimiento.',
       campos: [
-        { id: 'espera', label: 'Qué se espera y para cuándo', req: true, span: 2, pista: 'Bomba de agua, llega el viernes' },
+        {
+          id: 'espera',
+          label: 'Qué se espera y para cuándo',
+          req: true,
+          span: 2,
+          pista: 'Bomba de agua, llega el viernes',
+        },
       ],
       guardar: 'Poner en espera',
       alGuardar: (v) =>
@@ -1778,13 +1913,21 @@
       toast(
         `Enlace de seguimiento listo para ${esc(s.cliente.nombre.split(' ')[0])}; por WhatsApp solo se envía el enlace. <a href="${waUrl(s)}" target="_blank" rel="noopener">Enviar por WhatsApp</a> · <a href="portal.html#${s.tracking || 'k7Qw2mZ9pL4xT8vR'}" target="_blank" rel="noopener">Ver como cliente</a>`,
       ),
-    profeco: () =>
-      toast(
-        'El contrato PROFECO se genera en PDF en la fase 2: requiere RFC, domicilio y horarios del taller en Configuración.',
-      ),
+    profeco: (s) => window.FSApp.imprimirOrden(s),
+    otrocarro: (s) => {
+      location.hash = `#/recepcion?orden=${grupoDe(s)}`;
+    },
+    cancelar: cancelarServicio,
+    apoyo: agregarApoyo,
+    quitarapoyo: quitarApoyo,
     autorizar: (s) => {
       Estados.autorizar(s, CONFIG.ahora);
-      anotar(s, 'Registró la autorización del cliente', { estatus: 'COTIZADO' }, { estatus: 'AUTORIZADO', total: s.calc.total });
+      anotar(
+        s,
+        'Registró la autorización del cliente',
+        { estatus: 'COTIZADO' },
+        { estatus: 'AUTORIZADO', total: s.calc.total },
+      );
       toast(`Autorización registrada para la orden ${s.orden}. Las refacciones ya se pueden comprar.`);
       render();
     },
@@ -1864,13 +2007,22 @@
 
   // Siguiente código de servicio (FS-26-000123): consecutivo único, distinto del número de orden, que puede repetirse.
   const siguienteCodigo = () => {
-    const ultimo = Math.max(...servicios.map((s) => Number(s.codigo.slice(-6))));
+    const ultimo = Math.max(...servicios.map((s) => Number(/^FS-\d\d-(\d{6})/.exec(s.codigo)?.[1] || 0)));
     return `FS-26-${String(ultimo + 1).padStart(6, '0')}`;
   };
 
-  function renderRecepcion() {
-    setTitle('Nueva recepción');
-    const codigoNuevo = siguienteCodigo();
+  function renderRecepcion(params = new URLSearchParams()) {
+    // `?orden=<código>` agrega otro carro (folio) a una orden abierta; `?cliente=<teléfono>` recibe a un cliente conocido.
+    const base = servicios.find((x) => x.codigo === params.get('orden')) || null;
+    const grupo = base ? grupoDe(base) : null;
+    const previos = base ? foliosDe(base) : [];
+    const conocido =
+      base || servicios.find((x) => params.get('cliente') && x.cliente.telefono === params.get('cliente'));
+    const pre = conocido ? conocido.cliente : { nombre: '', telefono: '' };
+    setTitle(grupo ? `Otro carro para la orden ${base.orden}` : 'Nueva recepción');
+    const codigoNuevo = grupo ? `${grupo}-${previos.length + 1}` : siguienteCodigo();
+    const tecnicos = tecnicosActivos();
+    const recibePre = rol === 'tecnico' && tecnicos.some((e) => e.id === ID_ROL.tecnico) ? ID_ROL.tecnico : '';
 
     // Estado del formulario que no vive en un <input>: selección del catálogo, gasolina, inventario y daños.
     const st = {
@@ -1890,15 +2042,15 @@
 
     view.innerHTML = `
       <div class="title-row">
-        <div><h1>Nueva recepción</h1><p class="sub">Orden sugerida <strong>${CONFIG.siguienteOrden}</strong> · servicio <span class="mono">${codigoNuevo}</span> · Pablo recibe</p></div>
-        <div class="actions"><a class="btn ghost" href="#/dashboard">Cancelar</a></div>
+        <div><h1>${grupo ? `Otro carro para la orden ${base.orden}` : 'Nueva recepción'}</h1><p class="sub">${grupo ? `Carro ${previos.length + 1} de la orden <strong>${base.orden}</strong> · folio <span class="mono">${codigoNuevo}</span> · comparte el enlace de seguimiento del cliente` : `Orden sugerida <strong>${CONFIG.siguienteOrden}</strong> · servicio <span class="mono">${codigoNuevo}</span>`}</p></div>
+        <div class="actions"><a class="btn ghost" href="${grupo ? `#/orden/${base.codigo}` : '#/dashboard'}">Cancelar</a></div>
       </div>
       <form class="form-grid" id="rec" novalidate>
         <div>
           <fieldset class="fieldset"><legend>Cliente</legend>
             <div class="fields">
-              <div class="field span2"><label for="f-nombre">Nombre completo</label><input class="input" id="f-nombre" autocomplete="name" required></div>
-              <div class="field"><label for="f-tel">Teléfono</label><input class="input" id="f-tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" aria-describedby="h-tel" required><span class="hint" id="h-tel">10 dígitos</span></div>
+              <div class="field span2"><label for="f-nombre">Nombre completo</label><input class="input" id="f-nombre" autocomplete="name" value="${esc(pre.nombre)}"${grupo ? ' readonly' : ''} required></div>
+              <div class="field"><label for="f-tel">Teléfono</label><input class="input" id="f-tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" aria-describedby="h-tel" value="${esc(String(pre.telefono).replace(/\D/g, '').slice(0, 10))}"${grupo ? ' readonly' : ''} required><span class="hint" id="h-tel">10 dígitos</span></div>
               <div class="field span4"><label style="display:flex;gap:10px;align-items:center;font-weight:400"><input type="checkbox" id="f-consent" checked style="width:18px;height:18px;accent-color:var(--text)"> Recibirá por WhatsApp solo el enlace para seguir su vehículo (aviso de privacidad entregado)</label></div>
             </div>
           </fieldset>
@@ -1919,7 +2071,7 @@
 
           <fieldset class="fieldset"><legend>Ingreso</legend>
             <div class="fields">
-              <div class="field"><label for="f-orden">Número de orden</label><input class="input num" id="f-orden" inputmode="numeric" value="${CONFIG.siguienteOrden}" aria-describedby="h-orden"><span class="hint" id="h-orden">Puede repetirse si es otro servicio de la misma orden</span></div>
+              <div class="field"><label for="f-orden">Número de orden</label><input class="input num" id="f-orden" inputmode="numeric" value="${grupo ? base.orden : CONFIG.siguienteOrden}"${grupo ? ' readonly' : ''} aria-describedby="h-orden"><span class="hint" id="h-orden">${grupo ? 'Es la orden a la que se suma este carro' : 'Se sugiere el consecutivo; se puede cambiar'}</span></div>
               <div class="field"><label for="f-km">Kilometraje</label><input class="input num" id="f-km" inputmode="numeric" required></div>
               <div class="field span2"><label for="f-entrega">Persona que entrega el vehículo</label><input class="input" id="f-entrega" aria-describedby="h-entrega"><span class="hint" id="h-entrega">Si no es el cliente</span></div>
               <div class="field span4"><label>Gasolina al llegar</label><div class="seg" role="group" aria-label="Gasolina al llegar">${['Reserva', '1/4', '1/2', '3/4', 'Lleno'].map((g) => `<button type="button" data-fuel="${g}" aria-pressed="false">${g}</button>`).join('')}</div></div>
@@ -1957,6 +2109,17 @@
                   )
                   .join('')}</span></div>`,
             ).join('')}</div>
+          </fieldset>
+
+          <fieldset class="fieldset"><legend>Firma de quien recibe</legend>
+            <p class="desc">Firma el técnico que recibe el vehículo. Se guarda como trazos con un sello que detecta alteraciones, no como imagen.</p>
+            <div class="fields">
+              <div class="field span2"><label for="f-recibe">Técnico que recibe</label><select class="input" id="f-recibe" required><option value="">Elegir</option>${tecnicos.map((e) => `<option value="${esc(e.id)}"${e.id === recibePre ? ' selected' : ''}>${esc(e.nombre)}</option>`).join('')}</select></div>
+            </div>
+            <div class="firma-campo">
+              <div id="firma"></div>
+              <div class="firma-pie"><span class="hint" id="firma-est" aria-live="polite">Firma dentro del recuadro, con el dedo o el ratón</span><button class="btn small" type="button" id="firma-borrar">Borrar firma</button></div>
+            </div>
           </fieldset>
         </div>
 
@@ -2099,6 +2262,10 @@
       }
     });
     view.querySelectorAll('input:not([data-nota]), textarea').forEach((i) => i.addEventListener('input', actualizar));
+    // --- Firma del técnico que recibe ---
+    const pad = window.FS.Firma.montar($('#firma'), () => actualizar());
+    $('#firma-borrar').addEventListener('click', () => pad.limpiar());
+    $('#f-recibe').addEventListener('change', () => actualizar());
 
     // Redibuja las 5 vistas de la carrocería elegida y la lista de daños marcados.
     function dibujar() {
@@ -2132,6 +2299,8 @@
       if (!$('#f-falla').value.trim()) f.push('falla reportada');
       const pend = INVENTARIO.length - Object.keys(st.check).length;
       if (pend) f.push(`${pend} puntos del inventario`);
+      if (!$('#f-recibe').value) f.push('técnico que recibe');
+      if (!pad.firmada()) f.push('firma del técnico');
       return f;
     }
 
@@ -2178,6 +2347,7 @@
         ['Vehículo', st.modelo ? `${st.marca} ${st.modelo} ${st.anio || ''}` : '—'],
         ['Orden · servicio', `${$('#f-orden').value || '—'} · ${codigoNuevo}`],
         ['Gasolina', st.combustible || '—'],
+        ['Recibe', tecnicos.find((e) => e.id === $('#f-recibe').value)?.nombre || '—'],
         ['Inventario', `${rev} de ${INVENTARIO.length}${dañados ? ` · ${dañados} con daño` : ''}`],
         [
           'Daños en carrocería',
@@ -2196,17 +2366,26 @@
         : 'Todo listo. Al guardar se envía el enlace de seguimiento al cliente.';
       $('#guardar').disabled = !!f.length;
       $('#guardar').setAttribute('aria-describedby', 'faltan');
+      $('#firma-est').textContent = pad.firmada()
+        ? 'Firma capturada'
+        : 'Firma dentro del recuadro, con el dedo o el ratón';
     }
 
     // --- Guardar: crea el servicio en estatus RECIBIDO y abre su detalle ---
-    $('#rec').addEventListener('submit', (e) => {
+    let guardando = false;
+    $('#rec').addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (faltantes().length) return;
+      if (guardando || faltantes().length) return;
+      guardando = true;
+      const recibe = $('#f-recibe').value,
+        trazos = pad.trazos();
+      const hash = await window.FS.Firma.sellar(trazos, codigoNuevo, recibe, CONFIG.ahora);
       const vs = versiones(),
         elegida = st.version ? vs[+st.version.split('|')[0]] : null;
       const nuevo = {
-        orden: +$('#f-orden').value || CONFIG.siguienteOrden,
+        orden: grupo ? base.orden : +$('#f-orden').value || CONFIG.siguienteOrden,
         codigo: codigoNuevo,
+        ...(grupo ? { grupo } : {}),
         estatus: 'RECIBIDO',
         ingreso: CONFIG.ahora,
         cliente: { nombre: $('#f-nombre').value.trim(), telefono: $('#f-tel').value },
@@ -2224,6 +2403,9 @@
         tecnico: null,
         asesor: 'pablo',
         falla: $('#f-falla').value.trim(),
+        combustible: st.combustible,
+        inventario: INVENTARIO.map((_, i) => st.check[i]),
+        recepcion: { tecnico: recibe, hora: CONFIG.ahora, trazos, hash },
         danos: [...st.danos].map(([zona, tipo]) => ({ zona, tipo, nota: st.notas[zona] || '' })),
         trabajos: [],
         refacciones: [],
@@ -2231,9 +2413,15 @@
         pagos: [],
       };
       nuevo.calc = calcular(nuevo);
-      nuevo.tracking = window.FS.tokenNuevo();
+      // El enlace de seguimiento es de la orden: otro carro de la misma orden usa el mismo.
+      nuevo.tracking = grupo ? base.tracking : window.FS.tokenNuevo();
+      if (grupo) previos.forEach((f) => (f.grupo = grupo));
       servicios.push(nuevo);
-      anotar(nuevo, 'Registró la recepción del vehículo', null, { orden: nuevo.orden, placas: nuevo.vehiculo.placas });
+      anotar(nuevo, grupo ? 'Agregó un carro a la orden' : 'Registró la recepción del vehículo', null, {
+        orden: nuevo.orden,
+        placas: nuevo.vehiculo.placas,
+        recibe,
+      });
       CONFIG.siguienteOrden = Math.max(CONFIG.siguienteOrden, nuevo.orden + 1);
       location.hash = `#/orden/${codigoNuevo}`;
       toast(
@@ -2272,7 +2460,10 @@
   registrarRuta('hoy', () => renderHoy(), { menu: 'dashboard' }); // nombre anterior del dashboard
   registrarRuta('ordenes', (_, params) => renderOrdenes(params));
   registrarRuta('orden', ([codigo]) => renderDetalle(codigo), { menu: 'ordenes' });
-  registrarRuta('recepcion', () => renderRecepcion(), { permiso: 'recepcion', titulo: 'Nueva recepción' });
+  registrarRuta('recepcion', (_, params) => renderRecepcion(params), {
+    permiso: 'recepcion',
+    titulo: 'Nueva recepción',
+  });
 
   function render(anima = true) {
     if (anima) transicion(pintar);
@@ -2306,6 +2497,13 @@
   window.FSApp = {
     registrarRuta,
     bloqueado,
+    grupoDe,
+    foliosDe,
+    esDe,
+    anotar,
+    telMask,
+    pill,
+    INVENTARIO,
     quien,
     estatusTxt: Estados.etiqueta,
     entregar,

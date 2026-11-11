@@ -508,7 +508,7 @@
 
   // `codigo` preselecciona la orden cuando la compra se captura desde su detalle.
   function nuevaCompra(codigo = null) {
-    const abiertas = F.servicios.filter((s) => s.estatus !== 'ENTREGADO');
+    const abiertas = F.servicios.filter(F.Estados.abierto);
     formulario({
       titulo: 'Nueva compra',
       sub: 'La compra se guarda dentro de la orden: así su costo entra al cálculo de utilidad.',

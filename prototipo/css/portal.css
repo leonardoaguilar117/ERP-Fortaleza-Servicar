@@ -649,3 +649,44 @@ body {
     transition: none;
   }
 }
+
+/* ---------- varios vehículos en una orden: el cliente elige cuál ver ---------- */
+.p-carros {
+  margin-bottom: 14px;
+}
+.p-carros p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.p-carros > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.p-carros button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms var(--ease-out);
+}
+.p-carros button span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.p-carros button[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.p-carros button:active {
+  transform: scale(0.98);
+}

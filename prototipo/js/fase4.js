@@ -138,7 +138,7 @@
       neto = suma([ing, -egr]);
     const enCuentas = suma(F.cuentas.map((c) => saldoAl(c.id, todos, rF.hasta)));
     // situación a hoy: no depende del periodo
-    const piso = F.servicios.filter((s) => s.estatus !== 'ENTREGADO');
+    const piso = F.servicios.filter(F.Estados.abierto);
     const porCobrar = suma(piso.map((s) => Math.max(0, s.calc.saldo)));
     const porPagar = suma(F.compras.filter((c) => c.estatus === 'pendiente').map((c) => c.costo));
     const saldos = F.cuentas.map((c) => ({ ...c, saldo: F.saldoDe(c.id, todos) }));
@@ -702,7 +702,9 @@
   // =====================================================================================================
   const ROL_PERSONAL = { Administración: 'Administración', Asesor: 'Asesor de servicio', Técnico: 'Técnico' };
   const abiertos = (id) =>
-    F.servicios.filter((s) => s.estatus !== 'ENTREGADO' && (s.tecnico === id || s.asesor === id)).length;
+    F.servicios.filter(
+      (s) => F.Estados.abierto(s) && (s.tecnico === id || s.asesor === id || (s.apoyo || []).includes(id)),
+    ).length;
 
   function nuevoEmpleado() {
     formulario({

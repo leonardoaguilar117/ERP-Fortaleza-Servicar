@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/fase3.css">
   <link rel="stylesheet" href="css/fase4.css">
   <link rel="stylesheet" href="css/operacion.css">
+  <link rel="stylesheet" href="css/fase5.css">
 </head>
 <body>
   <div class="app">
@@ -59,6 +60,8 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><rect x="2" y="3.5" width="12" height="10.5" rx="1.5"/><path d="M2 7h12M5.5 2v3M10.5 2v3"/></svg>Citas y recordatorios<span class="count" id="nav-citas" title="Citas por confirmar"></span></a>
       <a class="nav-item" href="#/reportes" data-route="reportes" data-need="reportes">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2 13.5h12M4 11V7.5M8 11V3.5M12 11V6"/></svg>Reportes</a>
+      <a class="nav-item" href="#/clientes" data-route="clientes">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11 3.5a2.2 2.2 0 0 1 0 4.2M12.5 10.2c1 .5 1.7 1.6 2 3.3"/></svg>Clientes</a>
       </div>
 
       <div class="nav-group" data-g="admin">
@@ -73,11 +76,8 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11.5 6.5v4M9.5 8.5h4"/></svg>Empleados y roles</a>
       <a class="nav-item" href="#/bitacora" data-route="bitacora" data-need="bitacora">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M8 4.5V8l2.2 1.4"/><path d="M2.6 8a5.4 5.4 0 1 0 1.7-3.9"/><path d="M2.3 2.6v2.6h2.6"/></svg>Bitácora de cambios</a>
-      </div>
-
-      <div class="nav-group" data-g="pronto">
-        <div class="group-label">Próximamente</div>
-      <span class="nav-item" aria-disabled="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6M11 3.5a2.2 2.2 0 0 1 0 4.2M12.5 10.2c1 .5 1.7 1.6 2 3.3"/></svg>Clientes<span class="phase">Pronto</span></span>
+      <a class="nav-item" href="#/configuracion" data-route="configuracion" data-need="empleados">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"><path d="M2.5 4.5h6M11.5 4.5h2M2.5 11.5h2M7.5 11.5h6"/><circle cx="10" cy="4.5" r="1.5"/><circle cx="6" cy="11.5" r="1.5"/></svg>Configuración</a>
       </div>
 
       <div class="demo-tag"><span>Demo · datos de muestra</span>
@@ -129,6 +129,7 @@
   <script src="js/vehiculos.js"></script>
   <script src="js/datos.js"></script>
   <script src="js/estados.js"></script>
+  <script src="js/firma.js"></script>
   <script src="js/diagrama.js"></script>
   <script src="js/datos3.js"></script>
   <script src="js/datos4.js"></script>
@@ -136,5 +137,6 @@
   <script src="js/app.js"></script>
   <script src="js/fase3.js"></script>
   <script src="js/fase4.js"></script>
+  <script src="js/fase5.js"></script>
 </body>
 </html>

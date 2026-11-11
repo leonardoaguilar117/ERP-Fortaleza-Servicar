@@ -1,0 +1,347 @@
+/* Carros de una orden, cancelación, técnicos de apoyo, firma del técnico, Clientes, Configuración y la hoja
+   imprimible de la orden. Usa los tokens y los tres temas de fortaleza.css; ningún color va escrito a mano
+   (la hoja impresa es la excepción: va en negro sobre blanco para cualquier impresora). */
+
+/* ---------- carros (folios) de una orden ---------- */
+.folios {
+  margin: 4px 0 16px;
+}
+.folios-cap {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+.folios-cap b {
+  color: var(--text);
+  font-weight: 600;
+}
+.folios-l {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+.folio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: center;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color var(--t-press) var(--ease-out),
+    transform var(--t-press) var(--ease-out);
+}
+.folio .t {
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.folio .sub {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 12px;
+}
+.folio .pill {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.folio.on {
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.folio:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) {
+  .folio:not(.on):hover {
+    border-color: var(--muted);
+  }
+}
+
+/* ---------- servicio cancelado ---------- */
+.aviso-cancel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-card);
+  background: var(--pill-negative-bg);
+  color: var(--pill-negative-ink);
+}
+.aviso-cancel b {
+  font-weight: 600;
+}
+
+/* ---------- personal del folio ---------- */
+.per-r {
+  justify-content: space-between;
+  gap: 12px;
+}
+.per-r .k {
+  color: var(--muted);
+}
+.per-v {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ---------- firma del técnico ---------- */
+.firma-campo {
+  margin-top: 12px;
+}
+.firma-pad {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 3 / 1;
+  border: 1px dashed var(--muted);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--text);
+  cursor: crosshair;
+  touch-action: none; /* el dedo firma; no desplaza la página */
+}
+.firma-pad:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.firma-pie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 600px;
+  margin-top: 8px;
+}
+.firma-caja {
+  padding: 4px 12px 0;
+  color: var(--text);
+}
+.firma-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 110px;
+}
+
+/* ---------- clientes y configuración ---------- */
+.cli-veh {
+  display: block;
+}
+.cli-veh .sub {
+  display: inline;
+  margin-left: 4px;
+}
+.cfg-falta {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-card);
+  background: var(--pill-warning-bg);
+  color: var(--pill-warning-ink);
+  font-size: var(--fs-small);
+}
+.cfg-facts dd {
+  overflow-wrap: anywhere;
+}
+.cfg-nota {
+  max-width: 72ch;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+@media (max-width: 720px) {
+  .firma-pad {
+    aspect-ratio: 2 / 1;
+  }
+  .per-v .btn,
+  .firma-pie .btn {
+    min-height: 44px;
+  }
+}
+
+/* ---------- hoja imprimible de la orden ---------- */
+#impresion {
+  display: none;
+}
+@media print {
+  @page {
+    size: letter;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  body > *:not(#impresion) {
+    display: none !important;
+  }
+  #impresion {
+    display: block;
+    color: #000;
+    font:
+      11pt/1.4 Archivo,
+      Arial,
+      sans-serif;
+  }
+  #impresion p {
+    margin: 0 0 2pt;
+  }
+  #impresion h2 {
+    margin: 12pt 0 4pt;
+    padding-bottom: 2pt;
+    border-bottom: 0.5pt solid #000;
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  #impresion section {
+    break-inside: avoid;
+  }
+  .imp-cab {
+    display: flex;
+    justify-content: space-between;
+    gap: 16pt;
+    padding-bottom: 8pt;
+    border-bottom: 1.5pt solid #000;
+  }
+  .imp-marca {
+    font-size: 18pt;
+    font-weight: 650;
+  }
+  .imp-folio {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .imp-t {
+    font-size: 9pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .imp-n {
+    font-size: 20pt;
+    font-weight: 650;
+  }
+  .imp-dos {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 16pt;
+  }
+  .imp-lista {
+    margin: 0;
+    padding-left: 14pt;
+    columns: 2;
+  }
+  .imp-tabla {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .imp-tabla th,
+  .imp-tabla td {
+    padding: 3pt 0;
+    border-bottom: 0.5pt solid #999;
+    text-align: left;
+  }
+  .imp-tabla th:last-child,
+  .imp-tabla td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .imp-tabla tfoot td {
+    border-bottom: 0;
+    font-weight: 600;
+  }
+  .imp-trazo {
+    width: 70mm;
+    height: 24mm;
+    border-bottom: 0.5pt solid #000;
+    color: #000;
+  }
+  .imp-trazo svg {
+    width: 100%;
+    height: 100%;
+  }
+  .imp-sello {
+    font:
+      7pt/1.3 'IBM Plex Mono',
+      monospace;
+    overflow-wrap: anywhere;
+  }
+  .imp-pie {
+    margin-top: 14pt;
+    padding-top: 6pt;
+    border-top: 0.5pt solid #000;
+    font-size: 8pt;
+  }
+}
+
+/* ---------- diagnóstico por sistemas ---------- */
+.dx-sis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dx-sis .btn[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 550;
+}
+.dx-lista {
+  grid-template-columns: 1fr;
+}
+.dx-nota {
+  grid-column: 1 / -1;
+  margin-bottom: 8px;
+}
+.tri button[aria-pressed='true'][data-v='atencion'] {
+  background: var(--pill-warning-bg);
+  color: var(--pill-warning-ink);
+  font-weight: 550;
+}
+.tri button[aria-pressed='true'][data-v='urgente'] {
+  background: var(--pill-negative-bg);
+  color: var(--pill-negative-ink);
+  font-weight: 550;
+}
+.dx-res .row {
+  justify-content: space-between;
+  gap: 12px;
+}
+.dx-res .sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+.dx-pie {
+  margin: 6px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ---------- objetivos táctiles ----------
+   En el teléfono y en la tablet del taller (puntero grueso), todo lo que se toca mide al menos 44 px de alto.
+   Los enlaces dentro de un texto (.btn-link) quedan fuera: siguen la línea del párrafo. */
+@media (max-width: 720px), (pointer: coarse) {
+  #view button:not(.btn-link),
+  #view a.btn,
+  #view select.input,
+  #view input.input,
+  .dlg button:not(.btn-link),
+  .dlg .input {
+    min-height: 44px;
+  }
+}

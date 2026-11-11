@@ -52,7 +52,9 @@
   // Acceso por token: si no corresponde a ningún servicio, la respuesta no revela si existe
   // ---------------------------------------------------------------------------------------------------------------
   const token = location.hash.slice(1);
-  let s = servicios.find((x) => x.tracking && x.tracking === token);
+  // El enlace es de la orden: si trae varios carros, el cliente elige cuál ver (cada uno con su estatus).
+  const mios = () => servicios.filter((x) => x.tracking && x.tracking === token);
+  let s = mios()[0];
   if (!s) {
     // respuesta uniforme ante un token inválido: no da pistas de si existe
     root.innerHTML = `<section class="card-p"><h1 style="font-size:22px;font-weight:650">Enlace no disponible</h1><p class="vacio">Este enlace de seguimiento no es válido o ya venció. Pide uno nuevo al taller.</p></section>
@@ -78,6 +80,7 @@
     ESPERANDO_REFACCION: 3,
     TERMINADO: 4,
     ENTREGADO: 4,
+    CANCELADO: 0,
   };
   // Mensaje principal para el cliente en cada estatus: [título, detalle, tono].
   const NOW = {
@@ -89,6 +92,7 @@
     ESPERANDO_REFACCION: ['Esperamos una refacción', 'En cuanto llegue seguimos con la reparación.', 'warn'],
     TERMINADO: ['Tu vehículo está listo', 'Puedes pasar por él en horario del taller.', 'pos'],
     ENTREGADO: ['Entregado', 'Gracias por tu confianza.', 'neu'],
+    CANCELADO: ['Este servicio se canceló', 'Si tienes dudas, escríbele al taller.', 'neu'],
   };
   // Etiqueta corta de cada estatus: la misma del ERP.
   const PILL = Object.fromEntries(Object.keys(Estados.ESTATUS).map((k) => [k, Estados.etiqueta(k)]));
@@ -134,8 +138,12 @@
         <p class="veh">Placas ${esc(s.vehiculo.placas)} · orden ${esc(s.orden)}</p>
       </div><div id="emblema-sitio"></div></div>
       <span class="p-pill ${cls}">${PILL[s.estatus]}</span>
-      <div class="p-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Avance del servicio"><i style="--w:${pct}%"></i></div>
-      <div class="p-steps" aria-hidden="true"><span>Recibido</span><span>Reparación</span><span>Listo</span></div>
+      ${
+        s.estatus === 'CANCELADO'
+          ? ''
+          : `<div class="p-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Avance del servicio"><i style="--w:${pct}%"></i></div>
+      <div class="p-steps" aria-hidden="true"><span>Recibido</span><span>Reparación</span><span>Listo</span></div>`
+      }
       <p class="p-now">${now}</p><p class="p-sub">${sub}${s.estatus === 'ESPERANDO_REFACCION' && s.espera ? ` ${esc(s.espera)}.` : ''}</p>
       <p class="p-upd">Actualizado ${rel()}</p>
     </section>`;
@@ -262,13 +270,27 @@
   }
 
   function render(festejo = false) {
-    root.innerHTML = `<div class="p-grid">
+    const carros = mios();
+    root.innerHTML = `${
+      carros.length > 1
+        ? `<nav class="p-carros" aria-label="Tus vehículos en esta orden"><p>Esta orden trae ${carros.length} vehículos</p><div>${carros.map((c) => `<button type="button" data-carro="${esc(c.codigo)}" aria-pressed="${c === s}"><b>${esc(c.vehiculo.marca)} ${esc(c.vehiculo.modelo)}</b><span>${esc(c.vehiculo.placas)} · ${PILL[c.estatus]}</span></button>`).join('')}</div></nav>`
+        : ''
+    }<div class="p-grid">
       <aside class="p-side">${hero()}<a class="wa" href="${wa}?text=${encodeURIComponent(`Hola, tengo una duda sobre mi ${s.vehiculo.modelo} (orden ${s.orden}).`)}" target="_blank" rel="noopener">
         <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2.5 13.5 3.3 11A5.5 5.5 0 1 1 5 12.7Z"/></svg>Tengo dudas: escribir al taller</a></aside>
       <section class="p-main">
         <div class="seg2 full" role="tablist" aria-label="Secciones"><i class="ind"></i>${TABS.map(([k, l]) => `<button type="button" role="tab" data-v="${k}" aria-selected="${k === tab}">${l}${k === 'cot' && s.estatus === 'COTIZADO' ? '<span class="badge" aria-label="por autorizar"></span>' : ''}</button>`).join('')}</div>
         <div id="p-tab" role="tabpanel"></div>
       </section></div>`;
+    root.querySelectorAll('[data-carro]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const otro = mios().find((c) => c.codigo === b.dataset.carro);
+        if (!otro || otro === s) return;
+        s = otro;
+        tab = 'est';
+        render();
+      }),
+    );
     const seg = root.querySelector('.seg2'),
       ind = seg.querySelector('.ind'),
       bs = [...seg.querySelectorAll('button')];
@@ -372,7 +394,7 @@
 
   // El taller cambió algo en el ERP (otra pestaña de este navegador): el portal se actualiza solo.
   window.FS.alCambiarAlmacen = () => {
-    s = servicios.find((x) => x.tracking === token) || s;
+    s = mios().find((x) => x.codigo === s.codigo) || mios()[0] || s;
     if (!sheet.classList.contains('open')) render();
   };
 })();

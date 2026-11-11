@@ -17,11 +17,20 @@
   const F = window.FS;
   const LLAVE = 'fs-datos';
   // Sube este número cuando cambien los datos de muestra o su forma: descarta lo guardado con la versión anterior.
-  const VERSION = 1;
+  const VERSION = 2;
   const MAX_BITACORA = 500;
 
   // Arreglos que se guardan si existen en esta página (el portal solo carga servicios).
-  const COLECCIONES = ['servicios', 'compras', 'gastos', 'citas', 'recordatorios', 'manuales', 'empleados', 'auditoria'];
+  const COLECCIONES = [
+    'servicios',
+    'compras',
+    'gastos',
+    'citas',
+    'recordatorios',
+    'manuales',
+    'empleados',
+    'auditoria',
+  ];
 
   F.auditoria = F.auditoria || [];
 
@@ -38,7 +47,7 @@
   };
 
   function foto() {
-    const datos = { v: VERSION, siguienteOrden: F.CONFIG.siguienteOrden };
+    const datos = { v: VERSION, siguienteOrden: F.CONFIG.siguienteOrden, taller: F.CONFIG.tallerDatos };
     COLECCIONES.forEach((k) => {
       if (!Array.isArray(F[k])) return;
       datos[k] = k === 'servicios' ? F[k].map(sinCalculo) : k === 'compras' ? F[k].map(compraPlana) : F[k];
@@ -51,6 +60,20 @@
   // ---------------------------------------------------------------------------------------------------------------
   const esLista = Array.isArray;
   const esTexto = (v) => typeof v === 'string';
+  const ID = /^[\w-]{1,48}$/;
+  const diagnosticoValido = (d) =>
+    d &&
+    esTexto(d.fecha) &&
+    d.puntos &&
+    typeof d.puntos === 'object' &&
+    Object.entries(d.puntos).every(([k, v]) => /^[a-z]{1,24}:\d{1,2}$/.test(k) && esLista(v) && esTexto(v[0]));
+  // La firma se dibuja como SVG a partir de sus trazos: solo se aceptan números, y un sello hexadecimal o ninguno.
+  const recepcionValida = (r) =>
+    r &&
+    ID.test(r.tecnico) &&
+    esTexto(r.hora) &&
+    F.Firma.valida(r.trazos) &&
+    (r.hash === null || /^[0-9a-f]{64}$/.test(r.hash));
   const servicioValido = (s) =>
     s &&
     esTexto(s.codigo) &&
@@ -62,7 +85,12 @@
     s.vehiculo &&
     esTexto(s.vehiculo.marca) &&
     (s.tracking === undefined || /^[A-Za-z0-9]{16,64}$/.test(s.tracking)) &&
-    (s.tecnico == null || /^[\w-]{1,48}$/.test(s.tecnico)) &&
+    (s.tecnico == null || ID.test(s.tecnico)) &&
+    (s.grupo === undefined || /^[A-Z0-9-]{3,24}$/.test(s.grupo)) &&
+    (s.apoyo === undefined || (esLista(s.apoyo) && s.apoyo.every((x) => ID.test(x)))) &&
+    (s.cancelado === undefined || (s.cancelado && esTexto(s.cancelado.motivo))) &&
+    (s.recepcion === undefined || recepcionValida(s.recepcion)) &&
+    (s.diagnostico === undefined || diagnosticoValido(s.diagnostico)) &&
     [s.trabajos, s.refacciones, s.tot, s.pagos].every(esLista) &&
     [...s.trabajos, ...s.refacciones, ...s.tot].every((r) => esLista(r) && Number.isFinite(+r[1])) &&
     s.pagos.every((r) => esLista(r) && Number.isFinite(+r[2]) && Number.isFinite(+r[3]));
@@ -104,6 +132,10 @@
       delete c.pos;
     });
     if (Number.isFinite(+d.siguienteOrden)) F.CONFIG.siguienteOrden = +d.siguienteOrden;
+    if (d.taller && typeof d.taller === 'object')
+      Object.keys(F.CONFIG.tallerDatos).forEach((k) => {
+        if (esTexto(d.taller[k])) F.CONFIG.tallerDatos[k] = d.taller[k].slice(0, 200);
+      });
     // Las pantallas buscan a cada persona en PERSONAL: se agregan los empleados dados de alta en la demostración y
     // se suelta la asignación a alguien que ya no existe, para que ninguna orden apunte a un desconocido.
     (F.empleados || []).forEach((e) => {
@@ -111,6 +143,7 @@
     });
     F.servicios.forEach((s) => {
       if (s.tecnico && !F.PERSONAL[s.tecnico]) s.tecnico = null;
+      if (s.apoyo) s.apoyo = s.apoyo.filter((x) => F.PERSONAL[x] && x !== s.tecnico);
       if (!F.PERSONAL[s.asesor]) s.asesor = 'pablo';
     });
   }

@@ -26,6 +26,9 @@
   const CONFIG = {
     taller: 'Fortaleza Servicar',
     sucursal: 'Matriz',
+    // Datos fiscales y de contacto para el formato de la orden. Los captura Administración en Configuración;
+    // aquí van vacíos a propósito: no se inventan datos del taller.
+    tallerDatos: { razon: '', rfc: '', domicilio: '', telefono: '', horario: '' },
     margenRefacciones: 0.3, // utilidad de refacciones = 30 % del costo
     tarifaHoraMO: 400, // horas de mano de obra = utilidad MO ÷ $400
     // histórico: cobros con terminal anteriores a la plataforma (la plataforma ya no cobra); sostiene las utilidades del Excel
@@ -592,6 +595,7 @@
     {
       orden: 2829,
       codigo: 'FS-26-000475',
+      grupo: 'FS-26-000475', // orden con dos carros: este es el folio 1
       estatus: 'COTIZADO',
       ingreso: '2026-10-26T11:30',
       cotizado: '2026-10-26T18:05',
@@ -614,11 +618,12 @@
     },
     {
       orden: 2829,
-      codigo: 'FS-26-000476',
+      codigo: 'FS-26-000475-2', // folio 2 de la misma orden: otro carro del mismo cliente, con su propio estatus
+      grupo: 'FS-26-000475',
       estatus: 'RECIBIDO',
       ingreso: '2026-10-26T11:30',
       cliente: { nombre: 'Ricardo Salgado Uribe', telefono: '5520467719' },
-      vehiculo: v('Volkswagen', 'Jetta', 2016, 'Sport 1.4T', 'MSL-605-A', 'Negro', 97830, 'SEDAN', '3VWD17AJ1GM301245'),
+      vehiculo: v('Nissan', 'Versa', 2019, 'Advance 1.6', 'NTR-418-B', 'Blanco', 64210, 'SEDAN'),
       tecnico: null,
       asesor: 'pablo',
       falla: 'Rayón y abolladura en la defensa trasera.',
@@ -870,8 +875,9 @@
     }
     return out;
   };
+  // El enlace de seguimiento es de la orden: los folios de una misma orden comparten el token (§3.1).
   servicios.forEach((x) => {
-    x.tracking = x.tracking || token(x.codigo);
+    x.tracking = x.tracking || token(x.grupo || x.codigo);
   });
 
   // DATOS DE MUESTRA: cobrado mensual de los meses anteriores a octubre de 2026 (el Excel solo trae octubre).
